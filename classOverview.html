@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Class Overview</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Class Overview</h1>
+        <h2 id="teacherName"></h2>
+        <div id="classButtons"></div>
+        <div class="overview-content">
+            <div class="student-list">
+                <h3 id="selectedClass"></h3>
+                <h4 id="selectedDate"></h4>
+                <button id="selectAll">Select All</button>
+                <button id="saveAttendance">Save Attendance</button>
+                <ul id="studentList"></ul>
+                
+            </div>
+            <div class="calendar">
+                <h3>Attendance Calendar</h3>
+                <div id="weekCalendar"></div>
+                <div id="calendarNavigation">
+                    <button id="prevWeek">&lt; Previous Week</button>
+                    <button id="nextWeek">Next Week &gt;</button>
+                </div>
+                <div class="download-section">
+                    <button id="downloadAttendance">Download Monthly Attendance</button>
+                </div>
+            </div>
+        </div>
+        <a href="classOverview.html" class="overview-button">View Class Overview</a>
+        <a href="studentAssignment.html" class="overview-button">Student Assignment</a>
+        <a href="index.html" class="overview-button">Change Teacher</a>
+    </div>
+    <script src="classOverview.js"></script>
+</body>
+</html>

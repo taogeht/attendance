@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Class Assignment</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Student Class Assignment</h1>
+        <form id="assignmentForm">
+            <label for="studentName">Student Name:</label>
+            <input type="text" id="studentName" required>
+            
+            <label for="classSelect">Select Class:</label>
+            <select id="classSelect" required>
+                <option value="">--Select a class--</option>
+                <option value="1A">1A</option>
+                <option value="1B">1B</option>
+                <option value="1C">1C</option>
+                <option value="2A">2A</option>
+                <option value="2B">2B</option>
+                <option value="3A">3A</option>
+                <option value="3B">3B</option>
+                <option value="4A">4A</option>
+                <option value="4B">4B</option>
+                <option value="5A">5A</option>
+                <option value="5B">5B</option>
+                <option value="6">6</option>
+            </select>
+            
+            <button type="submit">Assign Class</button>
+        </form>
+        <div id="importSection">
+            <h2>Import Students</h2>
+            <p>Select a class and upload a CSV file with student names (one name per line).</p>
+            <select id="importClassSelect">
+                <option value="">--Select a class--</option>
+                <option value="1A">1A</option>
+                <option value="1B">1B</option>
+                <option value="1C">1C</option>
+                <option value="2A">2A</option>
+                <option value="2B">2B</option>
+                <option value="3A">3A</option>
+                <option value="3B">3B</option>
+                <option value="4A">4A</option>
+                <option value="4B">4B</option>
+                <option value="5A">5A</option>
+                <option value="5B">5B</option>
+                <option value="6">6</option>
+                <!-- ... other class options ... -->
+            </select>
+            <input type="file" id="csvFileInput" accept=".csv">
+            <button id="importButton">Import Students</button>
+        </div>
+        <div id="result"></div>
+        <div id="studentList">
+            <h2>Students in Class: <span id="selectedClassName"></span></h2>
+            <ul id="studentCheckList"></ul>
+            <button id="removeStudents" style="display: none;">Remove Selected Students</button>
+        </div>
+        <a href="classOverview.html" class="overview-button">View Class Overview</a>
+    </div>
+    <script src="studentAssignment.js"></script>
+</body>
+</html>
