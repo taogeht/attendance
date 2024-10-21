@@ -3,20 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teacher Selection</title>
+    <title>Select Your Name</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
         <h1>Select Your Name</h1>
-        <div class="teacher-buttons">
-            <a href="classOverview.html?teacher=Bryce" class="teacher-btn">Bryce</a>
-            <a href="classOverview.html?teacher=Dirk" class="teacher-btn">Dirk</a>
-            <a href="classOverview.html?teacher=James" class="teacher-btn">James</a>
-            <a href="classOverview.html?teacher=Mike" class="teacher-btn">Mike</a>
+        
+        <div id="teacherButtons" class="teacher-buttons">
+            <!-- Teacher buttons will be dynamically inserted here -->
         </div>
         <p></p>
-        <a href="studentAssignment.html" class="overview-button">Add Students</a>
+        <a href="studentAssignment.html" class="overview-button">Manage Students</a>
+        <a href="index.html" class="overview-button">Change Teacher</a>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-init.js"></script>
+    <script src="index.js"></script>
 </body>
 </html>

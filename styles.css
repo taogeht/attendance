@@ -341,3 +341,61 @@ button:hover, .class-btn:hover {
 #importButton:hover {
     background-color: #2980b9;
 }
+
+/* Add these styles to your existing styles.css file */
+
+.input-group {
+    margin-bottom: 15px;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.input-group input,
+.input-group select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+#result {
+    margin-top: 20px;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+#result p {
+    margin: 0;
+    padding: 10px;
+    background-color: #e7f3fe;
+    border: 1px solid #3498db;
+    border-radius: 4px;
+}
+
+.class-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.class-btn {
+    padding: 10px 15px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.class-btn:hover {
+    background-color: #45a049;
+}
+
+.class-btn.active {
+    background-color: #357a38;
+}
