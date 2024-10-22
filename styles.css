@@ -237,7 +237,7 @@ button:hover, .class-btn:hover {
 }
 
 .calendar-day.today {
-    background-color: #e6f3ff;
+    background-color: #ffe6e878;
     font-weight: bold;
 }
 
@@ -342,8 +342,6 @@ button:hover, .class-btn:hover {
     background-color: #2980b9;
 }
 
-/* Add these styles to your existing styles.css file */
-
 .input-group {
     margin-bottom: 15px;
 }
@@ -398,4 +396,21 @@ button:hover, .class-btn:hover {
 
 .class-btn.active {
     background-color: #357a38;
+}
+
+.download-button {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.download-button:hover {
+    background-color: #45a049;
 }
