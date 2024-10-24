@@ -1,3 +1,4 @@
+/* Base Styles */
 body {
     font-family: Arial, sans-serif;
     line-height: 1.6;
@@ -7,42 +8,54 @@ body {
 }
 
 .container {
-    width: 80%;
-    max-width: 800px;
+    width: 90%;
+    max-width: 1200px;
     margin: auto;
     overflow: hidden;
     padding: 20px;
 }
 
+/* Typography */
 h1, h2, h3 {
     color: #333;
     text-align: center;
+    margin-bottom: 1rem;
 }
 
+/* Form Elements */
 form {
     background: #fff;
     padding: 20px;
-    border-radius: 5px;
+    border-radius: 8px;
     margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 label {
     display: block;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
+    color: #444;
 }
 
-input[type="text"], select {
-    width: 100%;
-    padding: 8px;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
-button, .overview-button, .teacher-btn {
-    display: block;
+input[type="text"], 
+input[type="email"],
+select {
     width: 100%;
     padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 16px;
+}
+
+/* Buttons */
+button, 
+.overview-button, 
+.teacher-btn,
+.class-btn {
+    display: inline-block;
+    padding: 10px 20px;
     color: #fff;
     border: none;
     border-radius: 4px;
@@ -50,7 +63,8 @@ button, .overview-button, .teacher-btn {
     text-align: center;
     text-decoration: none;
     font-size: 16px;
-    margin-bottom: 10px;
+    margin: 5px;
+    transition: all 0.3s ease;
 }
 
 button, .class-btn {
@@ -59,96 +73,59 @@ button, .class-btn {
 
 button:hover, .class-btn:hover {
     background: #555;
+    transform: translateY(-1px);
 }
 
 .overview-button {
     background: #4CAF50;
+    display: block;
+    width: 100%;
+    margin: 10px 0;
 }
 
 .overview-button:hover {
     background: #45a049;
 }
 
+/* Results and Feedback */
 #result {
     margin-top: 20px;
-    padding: 10px;
+    padding: 15px;
     background: #fff;
-    border-radius: 5px;
-}
-
-#classButtons {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    margin-bottom: 20px;
-}
-
-.class-btn {
-    width: 30%;
-    margin-bottom: 10px;
-}
-
-#studentList {
-    background: #fff;
-    padding: 20px;
-    border-radius: 5px;
-    list-style-type: none;
-}
-
-#studentList li {
-    padding: 5px 0;
-    border-bottom: 1px solid #eee;
-}
-
-#studentList li:last-child {
-    border-bottom: none;
-}
-
-.teacher-buttons {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 50px;
-    margin-top: 50px;
-    
-}
-.teacher-btn {
-    background: #3498db;
-    padding: 20px;
-    font-size: 24px;
-    border-radius: 10px;
-    width: 80%; /* Make buttons smaller */
-    margin: 0 auto; /* Center buttons in their grid cells */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add shadow for depth */
-}
-
-.teacher-btn:hover {
-    background: #2980b9;
-    transform: translateY(-2px); /* Slight lift effect on hover */
-    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15); /* Increased shadow on hover */
-    transition: all 0.3s ease; /* Smooth transition for hover effects */
-}
-
-.overview-content {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 20px;
-}
-
-.student-list, .calendar {
-    width: 48%;
-    background: #fff;
-    padding: 20px;
-    border-radius: 5px;
+    border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+/* Class Buttons Container */
+#classButtons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.class-btn {
+    flex: 1;
+    min-width: 150px;
+    background: #3498db;
+    margin: 0;
+}
+
+.class-btn:hover {
+    background: #2980b9;
+}
+
+/* Student List */
 #studentList {
-    list-style-type: none;
-    padding: 0;
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
 }
 
 #studentList li {
-    padding: 10px 0;
+    padding: 10px;
     border-bottom: 1px solid #eee;
     display: flex;
     justify-content: space-between;
@@ -159,60 +136,78 @@ button:hover, .class-btn:hover {
     border-bottom: none;
 }
 
-.absence-checkbox {
-    margin-left: 10px;
-}
-
-#weekCalendar {
+/* Teacher Selection */
+.teacher-buttons {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 5px;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-top: 30px;
 }
 
-.calendar-day {
-    border: 1px solid #ddd;
-    padding: 5px;
+.teacher-btn {
+    background: #3498db;
+    padding: 20px;
+    font-size: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.teacher-btn:hover {
+    background: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Enhanced Calendar Styles */
+.overview-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+@media (max-width: 768px) {
+    .overview-content {
+        grid-template-columns: 1fr;
+    }
+}
+
+.student-list, 
+.calendar {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.month-year-display {
     text-align: center;
-}
-
-.calendar-day.today {
-    background-color: #e6f3ff;
+    font-size: 1.5em;
     font-weight: bold;
+    color: #333;
+    margin: 10px 0 20px;
 }
 
-#saveAttendance {
-    margin-top: 10px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    padding: 10px;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-#saveAttendance:hover {
-    background-color: #45a049;
-}
-
-#markAllPresent {
-    margin-bottom: 10px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    padding: 10px;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-#markAllPresent:hover {
-    background-color: #45a049;
-}
-#weekCalendar {
+.calendar-header {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     gap: 5px;
     margin-bottom: 10px;
-    width: 100%;
+}
+
+.calendar-header-cell {
+    text-align: center;
+    font-weight: bold;
+    color: #666;
+    padding: 10px;
+    font-size: 0.9em;
+}
+
+.calendar-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
 }
 
 .calendar-day {
@@ -220,197 +215,177 @@ button:hover, .class-btn:hover {
     padding: 10px;
     text-align: center;
     cursor: pointer;
-    transition: background-color 0.3s;
-    font-size: 0.9em;
-    word-break: break-word;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-height: 70px;
 }
-
-.calendar { 
-    width: 100%;
-    max-width: 100%;
-    overflow-x: auto;
-}
-
 
 .calendar-day:hover {
-    background-color: #f0f0f0;
+    background-color: #f8f9fa;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .calendar-day.today {
-    background-color: #ffe6e878;
-    font-weight: bold;
+    background-color: #e3f2fd;
+    border-color: #2196f3;
 }
 
 .calendar-day.selected {
-    background-color: #4CAF50;
+    background-color: #2196f3;
     color: white;
+    border-color: #1976d2;
 }
 
+.calendar-day.other-month {
+    color: #999;
+    background-color: #f8f9fa;
+}
+
+.date-number {
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.date-text {
+    font-size: 0.8em;
+    color: inherit;
+}
+
+/* Calendar Navigation Styles */
 #calendarNavigation {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 10px;
+    display: inline-flex; /* Changed from flex to inline-flex */
+    justify-content: center; /* Center the button group */
+    align-items: center;
+    margin: 15px 0;
+    background: #f5f5f5; /* Light background for the button group */
+    padding: 4px;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    width: auto; /* Allow natural width */
 }
 
-#calendarNavigation button {
-    padding: 5px 10px;
-    background-color: #220808;
+.calendar-nav-btn {
+    padding: 6px 12px;
+    background-color: #fff;
     border: 1px solid #ddd;
     cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.9em;
+    color: #333;
+    margin: 0; /* Remove margin */
+    border-radius: 0; /* Remove border radius */
 }
 
-#calendarNavigation button:hover {
-    background-color: #1c0d0d7b;
+/* Round corners for first and last buttons */
+.calendar-nav-btn:first-child {
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
 }
 
-#selectAll {
-    margin-bottom: 10px;
-    background-color: #4CAF50;
+.calendar-nav-btn:last-child {
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+
+.calendar-nav-btn + .calendar-nav-btn {
+    border-left: none;
+}
+
+.calendar-nav-btn:hover {
+    background-color: #f0f0f0;
+    z-index: 1; /* Ensure hover state shows above adjacent buttons */
+    position: relative;
+}
+
+.today-btn {
+    background-color: #2196f3;
     color: white;
-    border: none;
-    padding: 10px;
-    border-radius: 4px;
-    cursor: pointer;
+    border-color: #1976d2;
+    z-index: 2; /* Keep Today button's borders visible */
+    position: relative;
 }
 
-#selectAll:hover {
-    background-color: #45a049;
+.today-btn:hover {
+    background-color: #1976d2;
 }
-
-#studentList {
-    margin-top: 20px;
-    background: #fff;
-    padding: 20px;
-    border-radius: 5px;
-}
-
-#studentCheckList {
-    list-style-type: none;
-    padding: 0;
-}
-
-#studentCheckList li {
-    margin-bottom: 10px;
-}
-
-#removeStudents {
-    margin-top: 10px;
-    background-color: #e74c3c;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-#removeStudents:hover {
-    background-color: #c0392b;
-}
-
-#importSection {
-    margin-top: 20px;
-    background: #fff;
-    padding: 20px;
-    border-radius: 5px;
-}
-
-#importSection h2 {
-    margin-top: 0;
-}
-
-#importSection p {
-    margin-bottom: 15px;
-}
-
-#importClassSelect, #csvFileInput {
-    display: block;
-    width: 100%;
-    margin-bottom: 10px;
-    padding: 8px;
-}
-
-#importButton {
-    background-color: #3498db;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-#importButton:hover {
-    background-color: #2980b9;
-}
-
-.input-group {
-    margin-bottom: 15px;
-}
-
-.input-group label {
-    display: block;
-    margin-bottom: 5px;
-}
-
-.input-group input,
-.input-group select {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
-#result {
-    margin-top: 20px;
-    padding: 10px;
-    border-radius: 4px;
-}
-
-#result p {
-    margin: 0;
-    padding: 10px;
-    background-color: #e7f3fe;
-    border: 1px solid #3498db;
-    border-radius: 4px;
-}
-
-.class-buttons {
+/* Attendance Controls */
+.attendance-controls {
+    margin: 20px 0;
     display: flex;
-    flex-wrap: wrap;
     gap: 10px;
-    margin-bottom: 20px;
+    flex-wrap: wrap;
 }
 
-.class-btn {
-    padding: 10px 15px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 5px;
+.attendance-checkbox {
+    width: 20px;
+    height: 20px;
     cursor: pointer;
-    transition: background-color 0.3s;
 }
 
-.class-btn:hover {
-    background-color: #45a049;
-}
-
-.class-btn.active {
-    background-color: #357a38;
-}
-
+/* Download Button */
 .download-button {
-    display: block;
-    width: 100%;
-    padding: 10px;
-    margin-top: 10px;
     background-color: #4CAF50;
     color: white;
+    padding: 10px 20px;
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 16px;
+    margin-top: 20px;
+    width: 100%;
+    transition: background-color 0.3s ease;
 }
 
 .download-button:hover {
     background-color: #45a049;
+}
+
+/* Import Section */
+#importSection {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 600px) {
+    .container {
+        width: 95%;
+        padding: 10px;
+    }
+
+    .teacher-buttons {
+        grid-template-columns: 1fr;
+    }
+
+    .calendar-nav-btn {
+        padding: 4px 8px;
+        font-size: 0.8em;
+    }
+
+    .calendar-day {
+        min-height: 60px;
+        padding: 5px;
+    }
+}
+
+.linkButton {
+    display: inline-block;
+    padding: 40px 20px;
+    background-color: #4CAF50; /* Green background */
+    color: white; /* White text */
+    text-align: center;
+    text-decoration: none; /* Remove underline */
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.linkButton:hover {
+    background-color: #45a049; /* Darker green on hover */
 }
