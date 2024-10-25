@@ -12,6 +12,28 @@ function initializeApp() {
     const selectedClassName = document.getElementById('selectedClassName');
     const removeStudentsButton = document.getElementById('removeStudents');
     const importButton = document.getElementById('importButton');
+    const selectAllButton = document.createElement('button');
+
+    // Create and add the Select All button
+    selectAllButton.id = 'selectAllStudents';
+    selectAllButton.className = 'select-all-btn';
+    selectAllButton.textContent = 'Select All';
+    // Insert the button before the student list
+    studentCheckList.parentElement.insertBefore(selectAllButton, studentCheckList);
+
+    let allSelected = false;
+
+    selectAllButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        const checkboxes = studentCheckList.querySelectorAll('input[type="checkbox"]');
+        allSelected = !allSelected;
+        
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = allSelected;
+        });
+        
+        this.textContent = allSelected ? 'Deselect All' : 'Select All';
+    });
 
     async function getClasses() {
         const { data, error } = await window.supabase
@@ -123,16 +145,28 @@ function initializeApp() {
             const student = item.students;
             const li = document.createElement('li');
             li.innerHTML = `
-                <input type="checkbox" id="${student.id}" name="student" value="${student.id}">
-                <label for="${student.id}">${student.name}</label>
+                <input type="checkbox" id="student-${student.id}" name="student" value="${student.id}">
+                <label for="student-${student.id}">${student.name}</label>
             `;
             studentCheckList.appendChild(li);
         });
 
+        // Reset select all button state when loading new class
+        allSelected = false;
+        selectAllButton.textContent = 'Select All';
+
+        // Show/hide buttons based on whether there are students
         removeStudentsButton.style.display = data.length > 0 ? 'block' : 'none';
+        selectAllButton.style.display = data.length > 0 ? 'block' : 'none';
     }
 
     async function removeStudentsFromClass(classId, studentIds) {
+        const confirmRemoval = confirm(`Are you sure you want to remove ${studentIds.length} student(s) from the class?`);
+        
+        if (!confirmRemoval) {
+            return;
+        }
+
         const { error } = await window.supabase
             .from('class_students')
             .delete()
@@ -141,6 +175,7 @@ function initializeApp() {
 
         if (error) {
             console.error('Error removing students:', error);
+            result.innerHTML = '<p>Error removing students. Please try again.</p>';
             return;
         }
 
@@ -148,6 +183,7 @@ function initializeApp() {
         displayStudentList(classId);
     }
 
+    // Existing event listeners
     form.addEventListener('submit', async function(e) {
         e.preventDefault();
         
@@ -170,6 +206,7 @@ function initializeApp() {
             studentCheckList.innerHTML = '';
             selectedClassName.textContent = '';
             removeStudentsButton.style.display = 'none';
+            selectAllButton.style.display = 'none';
         }
     });
 
@@ -183,6 +220,7 @@ function initializeApp() {
             result.innerHTML = '<p>No students selected for removal.</p>';
         }
     });
+
    importButton.addEventListener('click', async function() {
         const selectedClass = importClassSelect.value;
         const fileInput = document.getElementById('csvFileInput');
@@ -202,22 +240,30 @@ function initializeApp() {
 
         reader.onload = async function(e) {
             const contents = e.target.result;
-            const students = contents.split(/\r\n|\n/).filter(name => name.trim() !== '');
+            const students = contents.split(/\r\n|\n/)
+            .map(name=> name.trim())
+            .filter(name => name !=='' && name !== ',');
             
             let successCount = 0;
             let failCount = 0;
 
             for (const studentName of students) {
-                const success = await assignStudentToClass(studentName.trim(), selectedClass);
-                if (success) {
-                    successCount++;
-                } else {
-                    failCount++;
+                // Remove any trailing commas and trim whitespace
+                const cleanName = studentName.replace(/,+$/, '').trim();
+                if (cleanName) {
+                    const success = await assignStudentToClass(cleanName, selectedClass);
+                    if (success) {
+                        successCount++;
+                    } else {
+                        failCount++;
+                    }
                 }
             }
 
             result.innerHTML = `<p>Import complete. ${successCount} students added successfully. ${failCount} students failed (already in class or error occurred).</p>`;
             displayStudentList(selectedClass);
+
+            fileInput.value='';
         };
 
         reader.onerror = function() {

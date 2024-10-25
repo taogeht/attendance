@@ -23,6 +23,7 @@ async function initializeApp() {
     document.getElementById('selectAll').addEventListener('click', toggleSelectAll);
     document.getElementById('saveAttendance').addEventListener('click', saveAttendance);
     document.getElementById('downloadMonthlyAttendance').addEventListener('click', downloadMonthlyAttendance);
+    document.getElementById('removeAttendance').addEventListener('click', removeAttendance);
 
     // Set up date change handler
     onDateChange = async (date) => {
@@ -33,6 +34,7 @@ async function initializeApp() {
         }
     };
 }
+
 
 function initializeCalendar() {
     const weekCalendar = document.getElementById('weekCalendar');
@@ -197,7 +199,12 @@ async function loadAttendance(classId, date) {
 
         checkboxes.forEach(checkbox => {
             const studentId = checkbox.dataset.student;
-            checkbox.checked = attendanceMap.get(studentId) ?? true; // Default to present if no record
+            // Only set checkbox state if there's an existing record
+            if (attendanceMap.has(studentId)) {
+                checkbox.checked = attendanceMap.get(studentId);
+            } else {
+                checkbox.checked = false; // Default to unchecked for new days
+            }
         });
     } catch (error) {
         console.error('Error loading attendance:', error);
@@ -364,12 +371,16 @@ async function saveAttendance() {
 
         if (deleteError) throw deleteError;
 
-        // Insert new records
-        const { error: insertError } = await window.supabase
-            .from('attendance_records')
-            .insert(attendanceRecords);
+        // Only insert records for checked students
+        const recordsToInsert = attendanceRecords.filter(record => record.is_present);
+        
+        if (recordsToInsert.length > 0) {
+            const { error: insertError } = await window.supabase
+                .from('attendance_records')
+                .insert(recordsToInsert);
 
-        if (insertError) throw insertError;
+            if (insertError) throw insertError;
+        }
 
         alert('Attendance saved successfully!');
     } catch (error) {
@@ -377,7 +388,46 @@ async function saveAttendance() {
         alert('Error saving attendance. Please try again.');
     }
 }
+async function removeAttendance() {
+    try {
+        if (!currentClass || !currentClass.id) {
+            alert('Please select a class first');
+            return;
+        }
 
+        // Confirm with the user before deleting
+        const confirmDelete = confirm(`Are you sure you want to remove all attendance records for ${selectedDate.toLocaleDateString('en-US', { 
+            weekday: 'long',
+            month: 'long',
+            day: 'numeric',
+            year: 'numeric'
+        })}?`);
+
+        if (!confirmDelete) {
+            return;
+        }
+
+        // Delete attendance records for the selected date and class
+        const { error } = await window.supabase
+            .from('attendance_records')
+            .delete()
+            .eq('class_id', currentClass.id)
+            .eq('date', selectedDate.toISOString().split('T')[0]);
+
+        if (error) throw error;
+
+        // Reset all checkboxes to unchecked state
+        const checkboxes = document.querySelectorAll('.attendance-checkbox');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = false; // Reset to unchecked state
+        });
+
+        alert('Attendance records removed successfully!');
+    } catch (error) {
+        console.error('Error removing attendance:', error);
+        alert('Error removing attendance records. Please try again.');
+    }
+}
 async function downloadMonthlyAttendance() {
     try {
         const firstDay = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
@@ -404,37 +454,45 @@ async function downloadMonthlyAttendance() {
 
         if (attendanceError) throw attendanceError;
 
-        // Generate CSV
+        // Generate CSV header
         const uniqueDates = [...new Set(attendanceData.map(record => record.date))].sort();
         let csvContent = 'Student Name';
+        
+        // Create single column for each date
         uniqueDates.forEach(date => {
-            csvContent += ',' + new Date(date).toLocaleDateString('en-US', {
+            const formattedDate = new Date(date).toLocaleDateString('en-US', {
                 month: '2-digit',
                 day: '2-digit'
             });
+            csvContent += `,${formattedDate}`;
         });
         csvContent += '\n';
 
         const attendanceMap = new Map(attendanceData.map(record => 
             [`${record.student_id}-${record.date}`, record.is_present]));
 
-        studentsData.forEach(studentRecord => {
-            const student = studentRecord.students;
-            csvContent += student.name;
+        // Sort students by name as stored in database
+        const sortedStudents = studentsData
+            .sort((a, b) => a.students.name.localeCompare(b.students.name));
+
+        sortedStudents.forEach(student => {
+            let studentRow = student.students.name;
             
+            // Build attendance row for this student
             uniqueDates.forEach(date => {
-                const key = `${student.id}-${date}`;
+                const key = `${student.students.id}-${date}`;
                 const isPresent = attendanceMap.get(key);
-                csvContent += ',';
+                
                 if (isPresent === false) {
-                    csvContent += 'A';
+                    studentRow += ',X';  // X for absent
                 } else if (isPresent === true) {
-                    csvContent += 'P';
+                    studentRow += ',✓';  // Checkmark for present
                 } else {
-                    csvContent += '-';
+                    studentRow += ',-';  // Dash for no record
                 }
             });
-            csvContent += '\n';
+            
+            csvContent += studentRow + '\n';
         });
 
         // Download CSV
