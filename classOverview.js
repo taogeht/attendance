@@ -35,6 +35,46 @@ async function initializeApp() {
     };
 }
 
+function createClassButtons(classes) {
+    const classButtonsContainer = document.getElementById('classButtons');
+    classButtonsContainer.innerHTML = '';
+    
+    // Helper function to safely extract class number and letter
+    const extractClassInfo = (className) => {
+        const match = className.match(/(\d+)([A-Za-z])/);
+        return {
+            number: match ? match[1] : '0',
+            letter: match ? match[2] : 'A'
+        };
+    };
+    
+    // Sort classes safely
+    const sortedClasses = classes.sort((a, b) => {
+        const aInfo = extractClassInfo(a.name);
+        const bInfo = extractClassInfo(b.name);
+        
+        // Compare numbers first
+        const numCompare = parseInt(aInfo.number) - parseInt(bInfo.number);
+        if (numCompare !== 0) return numCompare;
+        
+        // If numbers are the same, compare letters
+        return aInfo.letter.localeCompare(bInfo.letter);
+    });
+
+    sortedClasses.forEach(cls => {
+        const button = document.createElement('button');
+        button.textContent = cls.name;
+        button.classList.add('class-btn');
+        
+        // Safely add data attributes
+        const classInfo = extractClassInfo(cls.name);
+        button.dataset.classNumber = classInfo.number;
+        button.dataset.classLetter = classInfo.letter;
+        
+        button.addEventListener('click', () => selectClass(cls.id));
+        classButtonsContainer.appendChild(button);
+    });
+}
 
 function initializeCalendar() {
     const weekCalendar = document.getElementById('weekCalendar');
@@ -89,28 +129,15 @@ async function loadTeacherInfo(teacherId) {
         if (classesError) throw classesError;
 
         if (classes && classes.length > 0) {
-            // Sort classes by number then letter
-            const sortedClasses = classes.sort((a, b) => {
-                // Extract number and letter from class names
-                const [, aNum, aLetter] = a.name.match(/(\d+)([A-Za-z])/) || [null, '0', 'A'];
-                const [, bNum, bLetter] = b.name.match(/(\d+)([A-Za-z])/) || [null, '0', 'A'];
-                
-                // Compare numbers first
-                const numCompare = parseInt(aNum) - parseInt(bNum);
-                if (numCompare !== 0) return numCompare;
-                
-                // If numbers are the same, compare letters
-                return aLetter.localeCompare(bLetter);
-            });
-
-            createClassButtons(sortedClasses);
-            await selectClass(sortedClasses[0].id); // Select first class by default
+            createClassButtons(classes);
+            await selectClass(classes[0].id); // Select first class by default
         } else {
             document.getElementById('classButtons').innerHTML = '<p>No classes assigned to this teacher.</p>';
         }
     } catch (error) {
         console.error('Error loading teacher info:', error);
-        document.getElementById('classButtons').innerHTML = '<p>Error loading teacher information. Please try again later.</p>';
+        document.getElementById('classButtons').innerHTML = 
+            '<p class="error-message">Error loading teacher information. Please try again later.</p>';
     }
 }
 
@@ -118,13 +145,45 @@ function createClassButtons(classes) {
     const classButtonsContainer = document.getElementById('classButtons');
     classButtonsContainer.innerHTML = '';
     
-    classes.forEach(cls => {
+    // Helper function to extract number from class name
+    const getClassNumber = (className) => {
+        const match = className.match(/^(\d+)/);
+        return match ? parseInt(match[1], 10) : 0;
+    };
+
+    // Helper function to extract letter from class name
+    const getClassLetter = (className) => {
+        const match = className.match(/[A-Z]$/);
+        return match ? match[0] : '';
+    };
+    
+    // Sort classes numerically first, then by letter
+    const sortedClasses = [...classes].sort((a, b) => {
+        // Get numeric parts
+        const numA = getClassNumber(a.name);
+        const numB = getClassNumber(b.name);
+        
+        // Compare numbers first
+        if (numA !== numB) {
+            return numA - numB;
+        }
+        
+        // If numbers are equal, compare letters
+        const letterA = getClassLetter(a.name);
+        const letterB = getClassLetter(b.name);
+        return letterA.localeCompare(letterB);
+    });
+    
+    // Create buttons with sorted classes
+    sortedClasses.forEach(cls => {
         const button = document.createElement('button');
         button.textContent = cls.name;
         button.classList.add('class-btn');
-        // Add a data attribute for potential styling or sorting changes
-        button.dataset.classNumber = cls.name.match(/\d+/)[0];
-        button.dataset.classLetter = cls.name.match(/[A-Za-z]/)[0];
+        
+        // Add data attributes for potential styling
+        button.dataset.classNumber = getClassNumber(cls.name);
+        button.dataset.classLetter = getClassLetter(cls.name);
+        
         button.addEventListener('click', () => selectClass(cls.id));
         classButtonsContainer.appendChild(button);
     });
@@ -168,20 +227,66 @@ async function loadStudents(classId) {
             return;
         }
 
+        // Create single accordion section
+        const section = document.createElement('div');
+        section.className = 'accordion-section';
+
+        const header = document.createElement('div');
+        header.className = 'accordion-header';
+        header.innerHTML = `
+            <div class="header-content">
+                Students
+                <span class="expand-icon">▼</span>
+            </div>
+        `;
+
+        const content = document.createElement('div');
+        content.className = 'accordion-content';
+        
+        // Add all students to the content section
         students.forEach(student => {
-            const li = document.createElement('li');
-            li.innerHTML = `
-                ${student.students.name}
-                <input type="checkbox" class="attendance-checkbox" data-student="${student.students.id}">
+            const studentRow = document.createElement('div');
+            studentRow.className = 'student-row';
+            studentRow.innerHTML = `
+                <span class="student-name">${student.students.name}</span>
+                <input type="checkbox" 
+                       class="attendance-checkbox" 
+                       data-student="${student.students.id}">
             `;
-            studentList.appendChild(li);
+            content.appendChild(studentRow);
+        });
+
+        section.appendChild(header);
+        section.appendChild(content);
+        studentList.appendChild(section);
+
+        // Add click event
+        header.addEventListener('click', () => {
+            section.classList.toggle('active');
+            const expandIcon = header.querySelector('.expand-icon');
+            
+            if (section.classList.contains('active')) {
+                content.style.maxHeight = content.scrollHeight + "px";
+                expandIcon.style.transform = 'rotate(180deg)';
+            } else {
+                content.style.maxHeight = null;
+                expandIcon.style.transform = 'rotate(0deg)';
+            }
         });
 
         await loadAttendance(classId, selectedDate);
+
     } catch (error) {
         console.error('Error loading students:', error);
         document.getElementById('studentList').innerHTML = '<li>Error loading students. Please try again later.</li>';
     }
+}
+
+function updateSelectAllButtonState() {
+    const checkboxes = document.querySelectorAll('.attendance-checkbox');
+    const selectAllButton = document.getElementById('selectAll');
+    const allChecked = Array.from(checkboxes).every(checkbox => checkbox.checked);
+    selectAllButton.textContent = allChecked ? 'Deselect All' : 'Select All';
 }
 
 async function loadAttendance(classId, date) {
@@ -199,13 +304,11 @@ async function loadAttendance(classId, date) {
 
         checkboxes.forEach(checkbox => {
             const studentId = checkbox.dataset.student;
-            // Only set checkbox state if there's an existing record
-            if (attendanceMap.has(studentId)) {
-                checkbox.checked = attendanceMap.get(studentId);
-            } else {
-                checkbox.checked = false; // Default to unchecked for new days
-            }
+            checkbox.checked = attendanceMap.has(studentId) ? attendanceMap.get(studentId) : false;
         });
+
+        // Update the select all button state after loading attendance
+        updateSelectAllButtonState();
     } catch (error) {
         console.error('Error loading attendance:', error);
     }
@@ -297,11 +400,13 @@ function goToToday() {
     }
 }
 
-function selectDate(date) {
+async function selectDate(date) {
     selectedDate = date;
     updateCalendarDisplay();
     if (typeof onDateChange === 'function') {
-        onDateChange(selectedDate);
+        await onDateChange(selectedDate);
+        // Update select all button state after date change
+        updateSelectAllButtonState();
     }
 }
 

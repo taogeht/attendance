@@ -449,3 +449,82 @@ button:hover, .class-btn:hover {
 #studentCheckList input[type="checkbox"] {
     margin-right: 10px;
 }
+
+.accordion-section {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.accordion-header {
+    padding: 15px;
+    background-color: #f8f9fa;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    border-radius: 8px;
+}
+
+.accordion-header:hover {
+    background-color: #f0f0f0;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+    color: #333;
+}
+
+.expand-icon {
+    font-size: 12px;
+    transition: transform 0.3s ease;
+}
+
+.accordion-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+    background-color: #fff;
+}
+
+.student-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    border-top: 1px solid #eee;
+}
+
+.student-row:first-child {
+    border-top: none;
+}
+
+.student-name {
+    flex: 1;
+}
+
+.attendance-checkbox {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+/* Active state styles */
+.accordion-section.active .accordion-header {
+    background-color: #f0f0f0;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 600px) {
+    .accordion-header {
+        padding: 12px;
+    }
+
+    .student-row {
+        padding: 10px 12px;
+    }
+}
