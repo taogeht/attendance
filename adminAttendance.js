@@ -157,19 +157,7 @@ function updateCalendarDisplay() {
     const weekCalendar = document.getElementById('weekCalendar');
     weekCalendar.innerHTML = '';
 
-    // Create weekday headers
-    const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    const headerRow = document.createElement('div');
-    headerRow.className = 'calendar-header';
-    weekdays.forEach(day => {
-        const dayHeader = document.createElement('div');
-        dayHeader.className = 'calendar-header-cell';
-        dayHeader.textContent = day;
-        headerRow.appendChild(dayHeader);
-    });
-    weekCalendar.appendChild(headerRow);
-
-    // Create calendar days
+    // Create calendar days directly without the header row
     const daysContainer = document.createElement('div');
     daysContainer.className = 'calendar-days';
     
@@ -190,11 +178,12 @@ function updateCalendarDisplay() {
             dayElement.classList.add('other-month');
         }
 
+        // Include weekday abbreviation in the date text
         dayElement.innerHTML = `
-            <span class="date-number">${date.getDate()}</span>
             <span class="date-text">${date.toLocaleDateString('en-US', { 
                 weekday: 'short',
-                month: 'short'
+                month: 'short',
+                day: 'numeric'
             })}</span>
         `;
 

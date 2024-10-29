@@ -15,15 +15,35 @@ async function initializeApp() {
         return;
     }
 
-    await loadTeacherInfo(teacherId);
-    initializeCalendar();
-    updateSelectedDateDisplay();
+    // Safely add event listeners only if elements exist
+    const selectAllBtn = document.getElementById('selectAll');
+    const saveAttendanceBtn = document.getElementById('saveAttendance');
+    const downloadMonthlyBtn = document.getElementById('downloadMonthlyAttendance');
+    const removeAttendanceBtn = document.getElementById('removeAttendance');
 
-    // Set up event handlers
-    document.getElementById('selectAll').addEventListener('click', toggleSelectAll);
-    document.getElementById('saveAttendance').addEventListener('click', saveAttendance);
-    document.getElementById('downloadMonthlyAttendance').addEventListener('click', downloadMonthlyAttendance);
-    document.getElementById('removeAttendance').addEventListener('click', removeAttendance);
+    if (selectAllBtn) {
+        selectAllBtn.addEventListener('click', toggleSelectAll);
+    }
+    
+    if (saveAttendanceBtn) {
+        saveAttendanceBtn.addEventListener('click', saveAttendance);
+    }
+    
+    if (downloadMonthlyBtn) {
+        downloadMonthlyBtn.addEventListener('click', downloadMonthlyAttendance);
+    }
+    
+    if (removeAttendanceBtn) {
+        removeAttendanceBtn.addEventListener('click', removeAttendance);
+    }
+
+    await loadTeacherInfo(teacherId);
+    
+    // Only initialize calendar if weekCalendar element exists
+    if (document.getElementById('weekCalendar')) {
+        initializeCalendar();
+        updateSelectedDateDisplay();
+    }
 
     // Set up date change handler
     onDateChange = async (date) => {
@@ -34,7 +54,6 @@ async function initializeApp() {
         }
     };
 }
-
 function createClassButtons(classes) {
     const classButtonsContainer = document.getElementById('classButtons');
     classButtonsContainer.innerHTML = '';
@@ -95,16 +114,30 @@ function initializeCalendar() {
     monthYearDisplay.className = 'month-year-display';
     weekCalendar.parentNode.insertBefore(monthYearDisplay, weekCalendar);
 
-    // Add event listeners
+    // Add event listeners for calendar navigation
     document.getElementById('prevMonth').addEventListener('click', () => changeMonth(-1));
     document.getElementById('nextMonth').addEventListener('click', () => changeMonth(1));
     document.getElementById('prevWeek').addEventListener('click', () => changeWeek(-1));
     document.getElementById('nextWeek').addEventListener('click', () => changeWeek(1));
     document.getElementById('todayBtn').addEventListener('click', goToToday);
-    document.getElementById('linkButton').onclick = function (){
-        window.open ("https://www.oxfordlearnersbookshelf.com/home/main.html","_blank")};
-    // Initial render
+
+    // Safely handle the linkButton if it exists
+    const linkButton = document.getElementById('linkButton');
+    if (linkButton) {
+        linkButton.addEventListener('click', () => {
+            window.open("https://www.oxfordlearnersbookshelf.com/home/main.html", "_blank");
+        });
+    }
+
+    // Initial render of the calendar
     updateCalendarDisplay();
+}
+
+function addCalendarEventListener(elementId, eventType, handler) {
+    const element = document.getElementById(elementId);
+    if (element) {
+        element.addEventListener(eventType, handler);
+    }
 }
 
 async function loadTeacherInfo(teacherId) {
@@ -316,29 +349,9 @@ async function loadAttendance(classId, date) {
 
 function updateCalendarDisplay() {
     const weekCalendar = document.getElementById('weekCalendar');
-    const monthYearDisplay = document.getElementById('monthYearDisplay');
     weekCalendar.innerHTML = '';
 
-    // Update month/year display
-    const monthYear = currentWeekStart.toLocaleDateString('en-US', { 
-        month: 'long', 
-        year: 'numeric' 
-    });
-    monthYearDisplay.textContent = monthYear;
-
-    // Create weekday headers
-    const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    const headerRow = document.createElement('div');
-    headerRow.className = 'calendar-header';
-    weekdays.forEach(day => {
-        const dayHeader = document.createElement('div');
-        dayHeader.className = 'calendar-header-cell';
-        dayHeader.textContent = day;
-        headerRow.appendChild(dayHeader);
-    });
-    weekCalendar.appendChild(headerRow);
-
-    // Create calendar days
+    // Create calendar days directly without the header row
     const daysContainer = document.createElement('div');
     daysContainer.className = 'calendar-days';
     
@@ -359,11 +372,12 @@ function updateCalendarDisplay() {
             dayElement.classList.add('other-month');
         }
 
+        // Include weekday abbreviation in the date text
         dayElement.innerHTML = `
-            <span class="date-number">${date.getDate()}</span>
             <span class="date-text">${date.toLocaleDateString('en-US', { 
                 weekday: 'short',
-                month: 'short'
+                month: 'short',
+                day: 'numeric'
             })}</span>
         `;
 
@@ -435,16 +449,18 @@ function isCurrentMonth(date) {
     return date.getMonth() === currentMonth;
 }
 
+// Function to update the selected date display
 function updateSelectedDateDisplay() {
-    document.getElementById('selectedDate').textContent = 
-        `Attendance for ${selectedDate.toLocaleDateString('en-US', { 
+    const monthYearDisplay = document.getElementById('monthYearDisplay');
+    if (monthYearDisplay) {
+        monthYearDisplay.textContent = selectedDate.toLocaleDateString('en-US', { 
             weekday: 'long',
             month: 'long',
             day: 'numeric',
             year: 'numeric'
-        })}`;
+        });
+    }
 }
-
 function toggleSelectAll() {
     const checkboxes = document.querySelectorAll('.attendance-checkbox');
     const selectAllButton = document.getElementById('selectAll');
