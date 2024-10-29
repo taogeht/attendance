@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,12 +7,11 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    
     <div class="container">
         <h1 id="teacherName"></h1>
-        
-        <div id="classButtons" class="class-buttons">
 
+        <div id="classButtons" class="class-buttons">
+            <!-- Class buttons will be added here -->
         </div>
 
         <div class="overview-content">
@@ -21,27 +19,33 @@
                 <h2 id="selectedClass"></h2>
                 <h3 id="selectedDate"></h3>
                 <button id="selectAll">Select All</button>
-                <button id="saveAttendance" class="attendance-button">Save Attendance</button>
-                <button id="removeAttendance" class="attendance-button">Remove Attendance</button>
-
-                <ul id="studentList"></ul>
-            
+                <ul id="studentList">
+                    <!-- Students will be listed here -->
+                </ul>
+                <button id="saveAttendance">Save Attendance</button>
             </div>
+
             <div class="calendar">
                 <h3>Attendance Calendar</h3>
+                <div id="monthYearDisplay" class="month-year-display"></div>
                 <div id="weekCalendar"></div>
                 <div id="calendarNavigation">
-                    <button id="prevWeek">< Previous Week</button>
-                    <button id="nextWeek">Next Week ></button>
+                    <button id="prevWeek" class="calendar-nav-btn">&lt; Previous Week</button>
+                    <button id="todayBtn" class="calendar-nav-btn today-btn">Today</button>
+                    <button id="nextWeek" class="calendar-nav-btn">Next Week &gt;</button>
                 </div>
-                <button id="downloadMonthlyAttendance" class="download-button">Download Monthly Attendance</button>
+                <button id="downloadMonthlyAttendance">Download Monthly Attendance</button>
                 <button id="linkButton" class="linkButton">Family and Friends</button>
             </div>
         </div>
-        <a href="index.html" class="overview-button">Back to Teacher Selection</a>
+
+        <div class="navigation-buttons">
+            <a href="index.html" class="overview-button">Back to Teacher Selection</a>
+        </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Scripts -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="supabase-init.js"></script>
     <script src="classOverview.js"></script>
 </body>
