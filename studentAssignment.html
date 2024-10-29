@@ -4,50 +4,96 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Class Assignment</title>
+    <link rel="stylesheet" href="admin-layout.css">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>Admin Panel</h2>
+        </div>
+        <a href="index.html" class="nav-item">
+            <span class="nav-text">Teacher Selection</span>
+        </a>
+        <a href="adminAttendance.html" class="nav-item active">
+            <span class="nav-text">Attendance Overview</span>
+        </a>
+        <a href="studentAssignment.html" class="nav-item active">
+            <span class="nav-text">Student Assignment</span>
+        </a>
+        <a href="manageTeachers.html" class="nav-item">
+            <span class="nav-text">Manage Teachers</span>
+        </a>
+    </div>
+
     <div class="container">
         <h1>Student Class Assignment</h1>
 
-        <form id="assignmentForm">
-            <div class="input-group">
-                <label for="studentName">Student Name:</label>
-                <input type="text" id="studentName" name="studentName" required>
-            </div>
-            <div class="input-group">
-                <label for="classSelect">Select Class:</label>
-                <select id="classSelect" name="classSelect" required>
-                    <option value="">--Select a class--</option>
-                    <!-- Class options will be populated by JavaScript -->
-                </select>
-            </div>
-            <button type="submit">Assign Class</button>
-        </form>
+        <!-- Individual Student Assignment -->
+        <div class="section">
+            <form id="assignmentForm" class="form-section">
+                <div class="input-group">
+                    <label for="studentName">Student Name:</label>
+                    <input type="text" id="studentName" name="studentName" required>
+                </div>
 
-        <div id="importSection">
+                <div class="input-group">
+                    <label for="classSelect">Select Class:</label>
+                    <select id="classSelect" name="classSelect" required>
+                        <option value="">--Select a class--</option>
+                    </select>
+                </div>
+
+                <button type="submit">Assign Class</button>
+            </form>
+        </div>
+
+        <!-- Results Section -->
+        <div id="result" class="section">
+            <!-- Results will be displayed here -->
+        </div>
+
+        <!-- Student List Section -->
+        <div class="section">
+            <h2>Students in Class: <span id="selectedClassName"></span></h2>
+            <div class="student-list-container">
+                <!-- The Select All button will be inserted here by JavaScript -->
+                <ul id="studentCheckList" class="student-list">
+                    <!-- Students will be populated here -->
+                </ul>
+                <button id="removeStudents" class="danger-btn" style="display: none;">Remove Selected Students</button>
+            </div>
+        </div>
+
+        <!-- CSV Import Section -->
+        <div id="importSection" class="section">
             <h2>Import Students</h2>
             <p>Select a class and upload a CSV file with student names (one name per line).</p>
-            <select id="importClassSelect">
-                <option value="">--Select a class--</option>
-                <!-- Class options will be populated by JavaScript -->
-            </select>
-            <input type="file" id="csvFileInput" accept=".csv">
+            
+            <div class="input-group">
+                <label for="importClassSelect">Select Class:</label>
+                <select id="importClassSelect" name="importClassSelect">
+                    <option value="">--Select a class--</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label for="csvFileInput">Upload CSV File:</label>
+                <input type="file" id="csvFileInput" accept=".csv">
+            </div>
+
             <button id="importButton">Import Students</button>
         </div>
 
-        <div id="result"></div>
-
-        <div id="studentList">
-            <h2>Students in Class: <span id="selectedClassName"></span></h2>
-            <ul id="studentCheckList"></ul>
-            <button id="removeStudents" style="display: none;">Remove Selected Students</button>
+        <!-- Navigation Buttons -->
+        <div class="navigation-buttons">
+            <a href="classOverview.html" class="overview-button">View Class Overview</a>
+            <a href="index.html" class="overview-button">Change Teacher</a>
         </div>
-        <a href="index.html" class="overview-button">Change Teacher</a>
-        <a href="admin.html" class="overview-button">Back to Admin Panel</a>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <!-- Scripts -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="supabase-init.js"></script>
     <script src="studentAssignment.js"></script>
 </body>

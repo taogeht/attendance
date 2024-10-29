@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Teachers and Classes</title>
+    <link rel="stylesheet" href="admin-layout.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>Admin Panel</h2>
+        </div>
+        <a href="index.html" class="nav-item">
+            <span class="nav-text">Teacher Selection</span>
+        </a>
+        <a href="adminAttendance.html" class="nav-item active">
+            <span class="nav-text">Attendance Overview</span>
+        </a>
+
+        <a href="studentAssignment.html" class="nav-item">
+            <span class="nav-text">Student Assignment</span>
+        </a>
+        <a href="manageTeachers.html" class="nav-item active">
+            <span class="nav-text">Manage Teachers</span>
+        </a>
+    </div>
+
+    <div class="container">
+        <div id="message"></div>
+
+        <div class="management-grid">
+            <div class="section">
+                <h2>Manage Teachers</h2>
+                <form id="addTeacherForm" class="form-group">
+                    <label for="teacherName">Teacher Name:</label>
+                    <input type="text" id="teacherName" required>
+                    <button type="submit">Add Teacher</button>
+                </form>
+                <div id="teacherList">
+                    <!-- Teachers will be populated here by JavaScript -->
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Manage Classes</h2>
+                <form id="addClassForm" class="form-group">
+                    <label for="teacherSelect">Select Teacher:</label>
+                    <select id="teacherSelect" required>
+                        <option value="">Select a teacher</option>
+                    </select>
+                    
+                    <label for="className">Class Name:</label>
+                    <input type="text" id="className" required>
+                    <button type="submit">Add Class</button>
+                </form>
+                <div id="classList">
+                    <!-- Classes will be populated here by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="supabase-init.js"></script>
+    <script src="manageTeachersClasses.js"></script>
+</body>
+</html>

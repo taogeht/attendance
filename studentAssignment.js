@@ -39,26 +39,40 @@ function initializeApp() {
         const { data, error } = await window.supabase
             .from('classes')
             .select('id, name');
-
+    
         if (error) {
             console.error('Error fetching classes:', error);
             return;
         }
-
+    
+        // Sort classes alphanumerically
+        const sortedClasses = data.sort((a, b) => {
+            // Extract number and letter from class names
+            const [, aNum, aLetter] = a.name.match(/(\d+)([A-Za-z]*)/) || [null, '0', ''];
+            const [, bNum, bLetter] = b.name.match(/(\d+)([A-Za-z]*)/) || [null, '0', ''];
+            
+            // Compare numbers first
+            const numCompare = parseInt(aNum) - parseInt(bNum);
+            if (numCompare !== 0) return numCompare;
+            
+            // If numbers are the same, compare letters
+            return aLetter.localeCompare(bLetter);
+        });
+    
         const populateSelect = (selectElement) => {
             selectElement.innerHTML = '<option value="">--Select a class--</option>';
-            data.forEach(cls => {
+            sortedClasses.forEach(cls => {
                 const option = document.createElement('option');
                 option.value = cls.id;
                 option.textContent = cls.name;
                 selectElement.appendChild(option);
             });
         };
-
-        populateSelect(classSelect);
-        populateSelect(importClassSelect);
+    
+        // Populate both dropdowns with sorted classes
+        populateSelect(document.getElementById('classSelect'));
+        populateSelect(document.getElementById('importClassSelect'));
     }
-
     async function assignStudentToClass(studentName, classId) {
         let { data: students, error } = await window.supabase
             .from('students')
