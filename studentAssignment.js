@@ -1,90 +1,247 @@
+// Global variables
+let currentClassId = null;
+let editModal = null;
+let editNameInput = null;
+let currentStudentId = null;
+
 function initializeApp() {
     if (typeof window.supabase === 'undefined') {
         console.error('Supabase is not initialized. Please check your Supabase script inclusion.');
         return;
     }
 
+    // Get all required DOM elements
     const form = document.getElementById('assignmentForm');
     const result = document.getElementById('result');
     const classSelect = document.getElementById('classSelect');
     const importClassSelect = document.getElementById('importClassSelect');
     const studentCheckList = document.getElementById('studentCheckList');
-    const selectedClassName = document.getElementById('selectedClassName');
     const removeStudentsButton = document.getElementById('removeStudents');
     const importButton = document.getElementById('importButton');
-    const selectAllButton = document.createElement('button');
+    editModal = document.getElementById('editNameModal');
+    editNameInput = document.getElementById('editNameInput');
+    const saveNameBtn = document.getElementById('saveNameBtn');
+    const cancelEditBtn = document.getElementById('cancelEditBtn');
+    const editSelectedBtn = document.getElementById('editSelectedStudent');
 
-    // Create and add the Select All button
-    selectAllButton.id = 'selectAllStudents';
-    selectAllButton.className = 'select-all-btn';
-    selectAllButton.textContent = 'Select All';
-    // Insert the button before the student list
-    studentCheckList.parentElement.insertBefore(selectAllButton, studentCheckList);
+    // Verify critical elements exist
+    if (!studentCheckList || !classSelect) {
+        console.error('Critical elements missing from the DOM');
+        return;
+    }
+
+    // Create and add Select All button if it doesn't exist
+    let selectAllButton = document.getElementById('selectAllStudents');
+    if (!selectAllButton && studentCheckList.parentElement) {
+        selectAllButton = document.createElement('button');
+        selectAllButton.id = 'selectAllStudents';
+        selectAllButton.className = 'select-all-btn';
+        selectAllButton.textContent = 'Select All';
+        studentCheckList.parentElement.insertBefore(selectAllButton, studentCheckList);
+    }
 
     let allSelected = false;
 
-    selectAllButton.addEventListener('click', function(e) {
-        e.preventDefault();
-        const checkboxes = studentCheckList.querySelectorAll('input[type="checkbox"]');
-        allSelected = !allSelected;
-        
-        checkboxes.forEach(checkbox => {
-            checkbox.checked = allSelected;
+    // Add event listeners
+    if (selectAllButton) {
+        selectAllButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            const checkboxes = studentCheckList.querySelectorAll('input[type="checkbox"]');
+            allSelected = !allSelected;
+            
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = allSelected;
+            });
+            
+            this.textContent = allSelected ? 'Deselect All' : 'Select All';
         });
-        
-        this.textContent = allSelected ? 'Deselect All' : 'Select All';
-    });
+    }
 
-    async function getClasses() {
+    if (form) {
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const studentName = document.getElementById('studentName').value;
+            const selectedClass = classSelect.value;
+            
+            if (studentName && selectedClass) {
+                await assignStudentToClass(studentName, selectedClass);
+                form.reset();
+                displayStudentList(selectedClass);
+            } else {
+                result.innerHTML = '<p>Please fill out all fields.</p>';
+            }
+        });
+    }
+
+    if (classSelect) {
+        classSelect.addEventListener('change', function() {
+            currentClassId = this.value;
+            if (this.value) {
+                displayStudentList(this.value);
+            } else {
+                if (studentCheckList) {
+                    studentCheckList.innerHTML = '';
+                }
+                const selectedClassName = document.getElementById('selectedClassName');
+                if (selectedClassName) {
+                    selectedClassName.textContent = '';
+                }
+                if (removeStudentsButton) {
+                    removeStudentsButton.style.display = 'none';
+                }
+                if (selectAllButton) {
+                    selectAllButton.style.display = 'none';
+                }
+            }
+        });
+    }
+
+    if (removeStudentsButton) {
+        removeStudentsButton.addEventListener('click', async function() {
+            const selectedStudents = Array.from(studentCheckList.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+            
+            if (selectedStudents.length > 0) {
+                const currentClass = classSelect.value;
+                await removeStudentsFromClass(currentClass, selectedStudents);
+            } else {
+                result.innerHTML = '<p>No students selected for removal.</p>';
+            }
+        });
+    }
+
+    if (importButton) {
+        importButton.addEventListener('click', async function() {
+            const selectedClass = importClassSelect.value;
+            const fileInput = document.getElementById('csvFileInput');
+            
+            if (!selectedClass) {
+                result.innerHTML = '<p>Please select a class for import.</p>';
+                return;
+            }
+
+            if (!fileInput.files[0]) {
+                result.innerHTML = '<p>Please select a CSV file to import.</p>';
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = async function(e) {
+                const contents = e.target.result;
+                const students = contents.split(/\r\n|\n/)
+                    .map(name => name.trim())
+                    .filter(name => name !== '' && name !== ',');
+                
+                let successCount = 0;
+                let failCount = 0;
+
+                for (const studentName of students) {
+                    const cleanName = studentName.replace(/,+$/, '').trim();
+                    if (cleanName) {
+                        const success = await assignStudentToClass(cleanName, selectedClass);
+                        if (success) {
+                            successCount++;
+                        } else {
+                            failCount++;
+                        }
+                    }
+                }
+
+                result.innerHTML = `<p>Import complete. ${successCount} students added successfully. ${failCount} students failed (already in class or error occurred).</p>`;
+                displayStudentList(selectedClass);
+
+                fileInput.value = '';
+            };
+
+            reader.onerror = function() {
+                result.innerHTML = '<p>Error reading the CSV file.</p>';
+            };
+
+            reader.readAsText(file);
+        });
+    }
+
+    // Edit functionality
+    if (editSelectedBtn) {
+        editSelectedBtn.addEventListener('click', handleEditSelected);
+    }
+
+    if (saveNameBtn) {
+        saveNameBtn.addEventListener('click', handleSaveName);
+    }
+
+    if (cancelEditBtn) {
+        cancelEditBtn.addEventListener('click', closeEditModal);
+    }
+
+    if (editModal) {
+        window.addEventListener('click', (e) => {
+            if (e.target === editModal) {
+                closeEditModal();
+            }
+        });
+    }
+
+    // Initialize classes dropdown
+    getClasses();
+}
+
+async function getClasses() {
+    try {
         const { data, error } = await window.supabase
             .from('classes')
             .select('id, name');
-    
+
         if (error) {
             console.error('Error fetching classes:', error);
             return;
         }
-    
+
         // Sort classes alphanumerically
         const sortedClasses = data.sort((a, b) => {
-            // Extract number and letter from class names
             const [, aNum, aLetter] = a.name.match(/(\d+)([A-Za-z]*)/) || [null, '0', ''];
             const [, bNum, bLetter] = b.name.match(/(\d+)([A-Za-z]*)/) || [null, '0', ''];
             
-            // Compare numbers first
             const numCompare = parseInt(aNum) - parseInt(bNum);
             if (numCompare !== 0) return numCompare;
             
-            // If numbers are the same, compare letters
             return aLetter.localeCompare(bLetter);
         });
-    
+
         const populateSelect = (selectElement) => {
-            selectElement.innerHTML = '<option value="">--Select a class--</option>';
-            sortedClasses.forEach(cls => {
-                const option = document.createElement('option');
-                option.value = cls.id;
-                option.textContent = cls.name;
-                selectElement.appendChild(option);
-            });
+            if (selectElement) {
+                selectElement.innerHTML = '<option value="">--Select a class--</option>';
+                sortedClasses.forEach(cls => {
+                    const option = document.createElement('option');
+                    option.value = cls.id;
+                    option.textContent = cls.name;
+                    selectElement.appendChild(option);
+                });
+            }
         };
-    
-        // Populate both dropdowns with sorted classes
+
         populateSelect(document.getElementById('classSelect'));
         populateSelect(document.getElementById('importClassSelect'));
+    } catch (error) {
+        console.error('Error in getClasses:', error);
     }
-    async function assignStudentToClass(studentName, classId) {
+}
+
+async function assignStudentToClass(studentName, classId) {
+    try {
         let { data: students, error } = await window.supabase
             .from('students')
             .select('id')
             .eq('name', studentName);
 
-        let studentId;
         if (error) {
             console.error('Error checking student:', error);
             return false;
         }
 
+        let studentId;
         if (students.length === 0) {
             const { data, error } = await window.supabase
                 .from('students')
@@ -125,9 +282,25 @@ function initializeApp() {
         }
 
         return true;
+    } catch (error) {
+        console.error('Error in assignStudentToClass:', error);
+        return false;
+    }
+}
+
+async function displayStudentList(classId) {
+    const selectedClassName = document.getElementById('selectedClassName');
+    const studentCheckList = document.getElementById('studentCheckList');
+    const removeStudentsButton = document.getElementById('removeStudents');
+    const editSelectedButton = document.getElementById('editSelectedStudent');
+    const selectAllButton = document.getElementById('selectAllStudents');
+
+    if (!studentCheckList) {
+        console.error('Student checklist element not found');
+        return;
     }
 
-    async function displayStudentList(classId) {
+    try {
         const { data: classData, error: classError } = await window.supabase
             .from('classes')
             .select('name')
@@ -136,8 +309,10 @@ function initializeApp() {
 
         if (classError) {
             console.error('Error fetching class name:', classError);
-            selectedClassName.textContent = `Students in Class ${classId}`;
-        } else {
+            if (selectedClassName) {
+                selectedClassName.textContent = `Students in Class ${classId}`;
+            }
+        } else if (selectedClassName) {
             selectedClassName.textContent = `Students in ${classData.name}`;
         }
 
@@ -151,6 +326,7 @@ function initializeApp() {
 
         if (error) {
             console.error('Error fetching students:', error);
+            studentCheckList.innerHTML = '<li>Error loading students. Please try again.</li>';
             return;
         }
 
@@ -165,22 +341,28 @@ function initializeApp() {
             studentCheckList.appendChild(li);
         });
 
-        // Reset select all button state when loading new class
-        allSelected = false;
-        selectAllButton.textContent = 'Select All';
+        const hasStudents = data.length > 0;
+        const buttons = [removeStudentsButton, editSelectedButton, selectAllButton];
+        
+        buttons.forEach(button => {
+            if (button) {
+                button.style.display = hasStudents ? 'block' : 'none';
+            }
+        });
+    } catch (error) {
+        console.error('Error in displayStudentList:', error);
+        studentCheckList.innerHTML = '<li>An unexpected error occurred. Please try again.</li>';
+    }
+}
 
-        // Show/hide buttons based on whether there are students
-        removeStudentsButton.style.display = data.length > 0 ? 'block' : 'none';
-        selectAllButton.style.display = data.length > 0 ? 'block' : 'none';
+async function removeStudentsFromClass(classId, studentIds) {
+    const confirmRemoval = confirm(`Are you sure you want to remove ${studentIds.length} student(s) from the class?`);
+    
+    if (!confirmRemoval) {
+        return;
     }
 
-    async function removeStudentsFromClass(classId, studentIds) {
-        const confirmRemoval = confirm(`Are you sure you want to remove ${studentIds.length} student(s) from the class?`);
-        
-        if (!confirmRemoval) {
-            return;
-        }
-
+    try {
         const { error } = await window.supabase
             .from('class_students')
             .delete()
@@ -189,108 +371,76 @@ function initializeApp() {
 
         if (error) {
             console.error('Error removing students:', error);
-            result.innerHTML = '<p>Error removing students. Please try again.</p>';
+            document.getElementById('result').innerHTML = '<p>Error removing students. Please try again.</p>';
             return;
         }
 
-        result.innerHTML = `<p>${studentIds.length} student(s) removed from the class.</p>`;
-        displayStudentList(classId);
+        document.getElementById('result').innerHTML = `<p>${studentIds.length} student(s) removed from the class.</p>`;
+        await displayStudentList(classId);
+    } catch (error) {
+        console.error('Error in removeStudentsFromClass:', error);
+        document.getElementById('result').innerHTML = '<p>An unexpected error occurred. Please try again.</p>';
+    }
+}
+
+async function handleEditSelected() {
+    const selectedCheckboxes = document.querySelectorAll('#studentCheckList input[type="checkbox"]:checked');
+    
+    if (selectedCheckboxes.length !== 1) {
+        alert('Please select exactly one student to edit.');
+        return;
     }
 
-    // Existing event listeners
-    form.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        const studentName = document.getElementById('studentName').value;
-        const selectedClass = classSelect.value;
-        
-        if (studentName && selectedClass) {
-            await assignStudentToClass(studentName, selectedClass);
-            form.reset();
-            displayStudentList(selectedClass);
-        } else {
-            result.innerHTML = '<p>Please fill out all fields.</p>';
-        }
-    });
-
-    classSelect.addEventListener('change', function() {
-        if (this.value) {
-            displayStudentList(this.value);
-        } else {
-            studentCheckList.innerHTML = '';
-            selectedClassName.textContent = '';
-            removeStudentsButton.style.display = 'none';
-            selectAllButton.style.display = 'none';
-        }
-    });
-
-    removeStudentsButton.addEventListener('click', async function() {
-        const selectedStudents = Array.from(studentCheckList.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
-        
-        if (selectedStudents.length > 0) {
-            const currentClass = classSelect.value;
-            await removeStudentsFromClass(currentClass, selectedStudents);
-        } else {
-            result.innerHTML = '<p>No students selected for removal.</p>';
-        }
-    });
-
-   importButton.addEventListener('click', async function() {
-        const selectedClass = importClassSelect.value;
-        const fileInput = document.getElementById('csvFileInput');
-        
-        if (!selectedClass) {
-            result.innerHTML = '<p>Please select a class for import.</p>';
-            return;
-        }
-
-        if (!fileInput.files[0]) {
-            result.innerHTML = '<p>Please select a CSV file to import.</p>';
-            return;
-        }
-
-        const file = fileInput.files[0];
-        const reader = new FileReader();
-
-        reader.onload = async function(e) {
-            const contents = e.target.result;
-            const students = contents.split(/\r\n|\n/)
-            .map(name=> name.trim())
-            .filter(name => name !=='' && name !== ',');
-            
-            let successCount = 0;
-            let failCount = 0;
-
-            for (const studentName of students) {
-                // Remove any trailing commas and trim whitespace
-                const cleanName = studentName.replace(/,+$/, '').trim();
-                if (cleanName) {
-                    const success = await assignStudentToClass(cleanName, selectedClass);
-                    if (success) {
-                        successCount++;
-                    } else {
-                        failCount++;
-                    }
-                }
-            }
-
-            result.innerHTML = `<p>Import complete. ${successCount} students added successfully. ${failCount} students failed (already in class or error occurred).</p>`;
-            displayStudentList(selectedClass);
-
-            fileInput.value='';
-        };
-
-        reader.onerror = function() {
-            result.innerHTML = '<p>Error reading the CSV file.</p>';
-        };
-
-        reader.readAsText(file);
-    });
-
-    // Initialize
-    getClasses();
+    currentStudentId = selectedCheckboxes[0].value;
+    const studentName = selectedCheckboxes[0].nextElementSibling.textContent;
+    
+    editNameInput.value = studentName;
+    editModal.style.display = 'block';
 }
-// Check if the DOM is already loaded
+
+async function handleSaveName() {
+    if (!currentStudentId || !editNameInput.value.trim()) {
+        alert('Please enter a valid name.');
+        return;
+    }
+
+    try {
+        const { error } = await window.supabase
+            .from('students')
+            .update({ name: editNameInput.value.trim() })
+            .eq('id', currentStudentId);
+
+        if (error) throw error;
+
+        closeEditModal();
+        if (currentClassId) {
+            await displayStudentList(currentClassId);
+        }
+
+        const result = document.getElementById('result');
+        if (result) {
+            result.innerHTML = '<p>Student name updated successfully.</p>';
+            setTimeout(() => {
+                result.innerHTML = '';
+            }, 3000);
+        }
+    } catch (error) {
+        console.error('Error updating student name:', error);
+        alert('Error updating student name. Please try again.');
+    }
+}
+
+function closeEditModal() {
+    if (editModal) {
+        editModal.style.display = 'none';
+        if (editNameInput) {
+            editNameInput.value = '';
+        }
+        currentStudentId = null;
+    }
+}
+
+// Initialize the app when the DOM is loaded
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initializeApp);
 } else {

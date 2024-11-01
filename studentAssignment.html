@@ -54,16 +54,21 @@
         </div>
 
         <!-- Student List Section -->
-        <div class="section">
-            <h2>Students in Class: <span id="selectedClassName"></span></h2>
-            <div class="student-list-container">
-                <!-- The Select All button will be inserted here by JavaScript -->
-                <ul id="studentCheckList" class="student-list">
-                    <!-- Students will be populated here -->
-                </ul>
-                <button id="removeStudents" class="danger-btn" style="display: none;">Remove Selected Students</button>
+        <div class="student-actions">
+            <button id="editSelectedStudent" class="action-btn">Edit Selected</button>
+            <button id="removeStudents" class="danger-btn">Remove Selected Students</button>
+        </div>
+        <div id="editNameModal" class="modal">
+            <div class="modal-content">
+                <h3>Edit Student Name</h3>
+                <input type="text" id="editNameInput" class="edit-name-input">
+                <div class="modal-buttons">
+                    <button id="saveNameBtn" class="action-btn">Save</button>
+                    <button id="cancelEditBtn" class="danger-btn">Cancel</button>
+                </div>
             </div>
         </div>
+        <ul id="studentCheckList" class="student-list"></ul>
 
         <!-- CSV Import Section -->
         <div id="importSection" class="section">

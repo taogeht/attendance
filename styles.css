@@ -67,9 +67,19 @@ button:hover {
 
 .overview-button {
     background: #4CAF50;
-    display: block;
-    width: 100%;
-    margin: 10px 0;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    /* New styling for size and centering */
+    width: 50%;  /* Half the size of original */
+    margin: 10px auto;  /* Center horizontally with some vertical spacing */
+    display: block;  /* Allows margin auto to work */
+    text-align: center;
 }
 
 .overview-button:hover {
@@ -370,13 +380,13 @@ button:hover {
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 40px;
     margin: 40px;
-
+    padding: 4rem;
 }
 
 .teacher-btn {
     background: #3498db;
     color: white;
-    padding: 20px;
+    padding: 15px;
     font-size: 20px;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
