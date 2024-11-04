@@ -75,10 +75,9 @@ button:hover {
     border: none;
     cursor: pointer;
     transition: background-color 0.3s ease;
-    /* New styling for size and centering */
-    width: 50%;  /* Half the size of original */
-    margin: 10px auto;  /* Center horizontally with some vertical spacing */
-    display: block;  /* Allows margin auto to work */
+    width: 50%; 
+    margin: 10px auto;
+    display: block; 
     text-align: center;
 }
 
@@ -583,9 +582,17 @@ button:hover {
     background: #45a049;
 }
 
+/* Button Container */
+.button-container {
+    display: flex;
+    gap: 20px;  /* Space between buttons */
+    margin: 10px 0;
+}
+
 /* Link Button */
 .linkButton {
-    display: block;
+    flex: 1;  /* Make buttons share space equally */
+    display: inline-block;  /* Change from block to inline-block */
     padding: 60px 32px;
     margin: 4px 0px;
     background: #4CAF50;
@@ -593,6 +600,8 @@ button:hover {
     text-align: center;
     text-decoration: none;
     border-radius: 4px;
+    border: none;  /* Ensure no default button borders */
+    cursor: pointer;
 }
 
 .linkButton:hover {
@@ -622,6 +631,10 @@ button:hover {
     .calendar-nav-btn {
         flex: 1;
         min-width: 120px;
+    }
+    .button-container {
+        flex-direction: column;  /* Stack buttons on mobile */
+        gap: 10px;
     }
 }
 

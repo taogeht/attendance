@@ -122,13 +122,20 @@ function initializeCalendar() {
     document.getElementById('todayBtn').addEventListener('click', goToToday);
 
     // Safely handle the linkButton if it exists
-    const linkButton = document.getElementById('linkButton');
-    if (linkButton) {
-        linkButton.addEventListener('click', () => {
-            window.open("https://www.oxfordlearnersbookshelf.com/home/main.html", "_blank");
-        });
-    }
+    const familyFriendsButton = document.getElementById('familyFriendsButton');
+const phonicsButton = document.getElementById('phonicsButton');
 
+if (familyFriendsButton) {
+    familyFriendsButton.addEventListener('click', () => {
+        window.open("https://www.oxfordlearnersbookshelf.com/home/main.html", "_blank");
+    });
+}
+
+if (phonicsButton) {
+    phonicsButton.addEventListener('click', () => {
+        window.open("https://elt.oup.com/student/oxfordphonics/", "_blank");
+    });
+}
     // Initial render of the calendar
     updateCalendarDisplay();
 }
