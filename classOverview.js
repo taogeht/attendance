@@ -20,6 +20,10 @@ async function initializeApp() {
     const saveAttendanceBtn = document.getElementById('saveAttendance');
     const downloadMonthlyBtn = document.getElementById('downloadMonthlyAttendance');
     const removeAttendanceBtn = document.getElementById('removeAttendance');
+    const familyFriendsButton = document.getElementById('familyFriendsButton');
+    const phonicsButton = document.getElementById('phonicsButton');
+    const readerButton = document.getElementById('readerButton');
+    const homeworkButton = document.getElementById('homeworkButton');
 
     if (selectAllBtn) {
         selectAllBtn.addEventListener('click', toggleSelectAll);
@@ -37,6 +41,17 @@ async function initializeApp() {
         removeAttendanceBtn.addEventListener('click', removeAttendance);
     }
 
+    if (familyFriendsButton) {
+        familyFriendsButton.addEventListener('click', () => {
+            window.open("https://www.oxfordlearnersbookshelf.com/home/main.html", "_blank");
+        });
+    }
+    if (readerButton) {
+        readerButton.addEventListener('click', () => {
+            window.open("http://getepic.com/", "_blank");
+        });
+    }
+    
     await loadTeacherInfo(teacherId);
     
     // Only initialize calendar if weekCalendar element exists
@@ -122,7 +137,7 @@ function initializeCalendar() {
     document.getElementById('todayBtn').addEventListener('click', goToToday);
 
     // Safely handle the linkButton if it exists
-    const familyFriendsButton = document.getElementById('familyFriendsButton');
+const familyFriendsButton = document.getElementById('familyFriendsButton');
 const phonicsButton = document.getElementById('phonicsButton');
 
 if (familyFriendsButton) {
@@ -131,11 +146,11 @@ if (familyFriendsButton) {
     });
 }
 
-if (phonicsButton) {
-    phonicsButton.addEventListener('click', () => {
-        window.open("https://elt.oup.com/student/oxfordphonics/", "_blank");
-    });
-}
+//if (phonicsButton) {
+////    phonicsButton.addEventListener('click', () => {
+ //       window.open("https://huasiamacmillan.com/phonics/", "_blank");
+ //   });
+//}
     // Initial render of the calendar
     updateCalendarDisplay();
 }
@@ -244,9 +259,31 @@ async function selectClass(classId) {
 
     currentClass.name = data.name;
     document.getElementById('selectedClass').textContent = `Students in ${currentClass.name}`;
+    
+    updatePhonicsUrl(currentClass.name);
+
     await loadStudents(classId);
 }
 
+function updatePhonicsUrl(className) {
+    const phonicsButton = document.getElementById('phonicsButton');
+    if (!phonicsButton) return;
+
+    //Extract grade number from class name
+    const gradeMatch = className.match(/^(\d+)/);
+    if(gradeMatch) {
+        const grade = gradeMatch[1];
+        // Update the click handler
+        phonicsButton.onclick = () => {
+            window.open(`https://huasiamacmillan.com/phonics/phonics${grade}/`, "_blank");
+        };
+    } else {
+        phonicsButton.onclick = () => {
+            window.open("https://huasiamacmillan.com/phonics/", "_blank");
+        };
+    }
+    
+}
 async function loadStudents(classId) {
     try {
         const { data: students, error } = await window.supabase
