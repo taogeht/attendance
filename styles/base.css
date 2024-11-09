@@ -1,0 +1,50 @@
+/* Base styles for core elements */
+body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    min-height: 100vh;
+}
+
+h1, h2, h3 {
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+/* Typography */
+.text-center {
+    text-align: center;
+}
+
+/* Containers */
+.container {
+    margin-left: 250px;
+    padding: 20px;
+    min-height: 100vh;
+    width: calc(100% - 250px);
+    box-sizing: border-box;
+    background-color: #f5f6fa;
+}
+
+.section {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Basic Utility Classes */
+.hidden {
+    display: none;
+}
+
+.visible {
+    display: block;
+}
+
+.clearfix::after {
+    content: "";
+    clear: both;
+    display: table;
+}

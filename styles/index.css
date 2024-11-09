@@ -1,0 +1,17 @@
+/* Main Stylesheet - imports all other stylesheets */
+
+/* Base styles and layout */
+@import 'base.css';
+@import 'layout.css';
+@import 'components.css';
+
+/* Component styles */
+@import 'forms.css';
+@import 'buttons.css';
+@import 'calendar.css';
+@import 'modal.css';
+@import 'accordion.css';
+@import 'login.css';
+
+/* Responsive styles should be last to override other styles */
+@import 'responsive.css';

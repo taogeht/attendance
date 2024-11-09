@@ -1,0 +1,90 @@
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .overview-content {
+        grid-template-columns: 1fr;
+    }
+
+    .button-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .header {
+        flex-direction: column;
+        gap: 15px;      
+    }
+
+    .student-controls {
+        flex-direction: column;
+    }
+
+    .student-controls button {
+        width: 100%;
+    }
+
+    .nav-buttons {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .button-container {
+        grid-template-columns: 1fr;
+    }
+
+    .calendar-days {
+        min-width: 700px;
+    }
+
+    .linkButton {
+        padding: 20px 15px;
+    }
+
+    .class-buttons {
+        flex-direction: column;
+    }
+
+    .class-btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 576px) {
+    .modal-content {
+        width: 95%;
+        margin: 10% auto;
+    }
+
+    .calendar-nav-btn {
+        padding: 6px 12px;
+        font-size: 0.8em;
+        min-width: auto;
+    }
+    .container {
+        padding: 10px;
+    }
+
+    .header {
+        padding: 15px;
+    }
+
+    .nav-buttons {
+        flex-direction: column;
+    }
+
+    .nav-btn {
+        width: 100%;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .no-print {
+        display: none;
+    }
+}

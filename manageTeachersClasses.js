@@ -1,9 +1,53 @@
-// manageTeachersClasses.js
+
+(function() {
+    const isAdmin = localStorage.getItem('isAdmin') === 'true';
+    if (!isAdmin) {
+        const teacherId = localStorage.getItem('teacherId');
+        if (teacherId) {
+            window.location.href = `classOverview.html?teacher=${teacherId}`;
+        } else {
+            window.location.href = 'login.html';
+        }
+    }
+})();
 
 // State management
 let currentTeacher = null;
 let teachers = [];
 let classes = [];
+
+document.addEventListener('DOMContentLoaded', () => {
+    checkAuth(true);  // Explicitly require admin access
+});
+
+
+async function checkAuth() {
+    const sessionToken = localStorage.getItem('sessionToken');
+    const teacherId = localStorage.getItem('teacherId');
+
+    if (!sessionToken || !teacherId) {
+        window.location.href = 'login.html';
+        return;
+    }
+
+    try {
+        const { data: session, error } = await window.supabase
+            .from('active_sessions')
+            .select('expires_at')
+            .eq('session_token', sessionToken)
+            .eq('teacher_id', teacherId)
+            .single();
+
+        if (error || !session || new Date(session.expires_at) <= new Date()) {
+            localStorage.removeItem('sessionToken');
+            localStorage.removeItem('teacherId');
+            window.location.href = 'login.html';
+        }
+    } catch (error) {
+        console.error('Auth check error:', error);
+        window.location.href = 'login.html';
+    }
+}
 
 // Initialize the application
 async function initializeApp() {

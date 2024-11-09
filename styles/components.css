@@ -1,0 +1,90 @@
+/* Student Controls */
+.student-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.student-controls button {
+    flex: 1;
+    min-width: 150px;
+    padding: 10px 15px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.student-controls button:hover {
+    background-color: #45a049;
+}
+
+/* Resource Links */
+.linkButton {
+    display: block;
+    padding: 30px 20px;
+    background: #4CAF50;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.linkButton:hover {
+    background: #45a049;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* Class Buttons */
+.class-btn {
+    flex: 1;
+    min-width: 120px;
+    padding: 15px 20px;
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.class-btn:hover {
+    background: #2980b9;
+    transform: translateY(-1px);
+}
+
+/* Nav Buttons */
+.nav-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+#changePasswordBtn {
+    background-color: #4CAF50;
+    color: white;
+}
+
+#changePasswordBtn:hover {
+    background-color: #45a049;
+}
+
+#logoutBtn {
+    background-color: #dc3545;
+    color: white;
+}
+
+#logoutBtn:hover {
+    background-color: #c82333;
+}

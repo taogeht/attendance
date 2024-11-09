@@ -1,0 +1,176 @@
+/* Accordion Styles */
+.accordion-section {
+    background: white;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.accordion-header {
+    background: #f8f9fa;
+    padding: 15px 20px;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.3s ease;
+}
+
+.accordion-header:hover {
+    background: #e9ecef;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+.class-title {
+    font-weight: bold;
+    color: #333;
+    flex: 1;
+}
+
+.expand-icon {
+    transition: transform 0.3s ease;
+    font-size: 12px;
+    color: #666;
+}
+
+.accordion-section.active .expand-icon {
+    transform: rotate(180deg);
+}
+
+.accordion-content {
+    padding: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+}
+
+.accordion-section.active .accordion-content {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+/* Student List within Accordion */
+.student-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.student-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.student-row:last-child {
+    border-bottom: none;
+}
+
+.student-name {
+    flex: 1;
+    margin-right: 15px;
+}
+
+.attendance-checkbox {
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    cursor: pointer;
+}
+
+/* Attendance Summary */
+.attendance-summary {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    gap: 15px;
+    font-size: 0.9em;
+}
+
+.attendance-summary span {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.attendance-summary .present {
+    color: #4CAF50;
+}
+
+.attendance-summary .absent {
+    color: #f44336;
+}
+
+.attendance-summary .total {
+    color: #2196F3;
+}
+
+/* Attendance Status Styles */
+.student-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+}
+
+.student-item.present {
+    background-color: #f1f8e9;
+}
+
+.student-item.absent {
+    background-color: #ffebee;
+}
+
+.student-item.no-record {
+    background-color: #f5f5f5;
+}
+
+.attendance-status {
+    font-weight: bold;
+}
+
+.student-item.present .attendance-status {
+    color: #4CAF50;
+}
+
+.student-item.absent .attendance-status {
+    color: #f44336;
+}
+
+/* Accordion Footer */
+.accordion-footer {
+    padding: 15px;
+    border-top: 1px solid #eee;
+    background: #f8f9fa;
+}
+
+/* Student Controls */
+.student-controls {
+    margin-bottom: 20px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+    .student-controls {
+        flex-direction: column;
+    }
+
+    .student-controls button {
+        width: 100%;
+    }
+
+    .attendance-summary {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

@@ -5,9 +5,118 @@ let selectedDate = new Date();
 let currentWeekStart = getWeekStart(new Date());
 let onDateChange = null;
 
+// Add this to the top of each page's JavaScript files
+async function checkAuth() {
+    const sessionToken = localStorage.getItem('sessionToken');
+    const teacherId = localStorage.getItem('teacherId');
+
+    if (!sessionToken || !teacherId) {
+        window.location.href = 'login.html';
+        return;
+    }
+
+    try {
+        const { data: session, error } = await window.supabase
+            .from('active_sessions')
+            .select('expires_at')
+            .eq('session_token', sessionToken)
+            .eq('teacher_id', teacherId)
+            .single();
+
+        if (error || !session || new Date(session.expires_at) <= new Date()) {
+            localStorage.removeItem('sessionToken');
+            localStorage.removeItem('teacherId');
+            window.location.href = 'login.html';
+        }
+    } catch (error) {
+        console.error('Auth check error:', error);
+        window.location.href = 'login.html';
+    }
+}
+
+// Call this when the page loads
+document.addEventListener('DOMContentLoaded', () => {
+    checkAuth();
+});
+document.addEventListener('DOMContentLoaded', function() {
+    const passwordForm = document.getElementById('passwordChangeForm');
+    const messageDiv = document.getElementById('passwordChangeMessage');
+
+    if (passwordForm) {
+        passwordForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            // Basic validation
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                showPasswordMessage('Please fill in all fields', 'error');
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                showPasswordMessage('New passwords do not match', 'error');
+                return;
+            }
+
+            if (newPassword.length < 6) {
+                showPasswordMessage('New password must be at least 6 characters', 'error');
+                return;
+            }
+
+            const result = await changePassword(currentPassword, newPassword);
+            showPasswordMessage(result.message, result.success ? 'success' : 'error');
+
+            if (result.success) {
+                passwordForm.reset();
+            }
+        });
+    }
+
+    function showPasswordMessage(text, type) {
+        if (messageDiv) {
+            messageDiv.textContent = text;
+            messageDiv.className = `message ${type}`;
+            messageDiv.style.display = 'block';
+
+            if (type === 'success') {
+                setTimeout(() => {
+                    messageDiv.style.display = 'none';
+                }, 3000);
+            }
+        }
+    }
+});
 async function initializeApp() {
     const urlParams = new URLSearchParams(window.location.search);
     const teacherId = urlParams.get('teacher');
+
+    // Add logout button initialization
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', async () => {
+            const sessionToken = localStorage.getItem('sessionToken');
+            if (sessionToken) {
+                try {
+                    // Remove session from database
+                    await window.supabase
+                        .from('active_sessions')
+                        .delete()
+                        .eq('session_token', sessionToken);
+                } catch (error) {
+                    console.error('Logout error:', error);
+                }
+            }
+            
+            // Clear all local storage
+            localStorage.clear();
+            
+            // Redirect to login page
+            window.location.href = 'login.html';
+        });
+    }
 
     if (!teacherId) {
         console.error('No teacher ID provided');
@@ -20,7 +129,6 @@ async function initializeApp() {
     const saveAttendanceBtn = document.getElementById('saveAttendance');
     const downloadMonthlyBtn = document.getElementById('downloadMonthlyAttendance');
     const removeAttendanceBtn = document.getElementById('removeAttendance');
-    const familyFriendsButton = document.getElementById('familyFriendsButton');
     const phonicsButton = document.getElementById('phonicsButton');
     const readerButton = document.getElementById('readerButton');
     const homeworkButton = document.getElementById('homeworkButton');
@@ -41,11 +149,6 @@ async function initializeApp() {
         removeAttendanceBtn.addEventListener('click', removeAttendance);
     }
 
-    if (familyFriendsButton) {
-        familyFriendsButton.addEventListener('click', () => {
-            window.open("https://www.oxfordlearnersbookshelf.com/home/main.html", "_blank");
-        });
-    }
     if (readerButton) {
         readerButton.addEventListener('click', () => {
             window.open("http://getepic.com/", "_blank");
@@ -137,20 +240,14 @@ function initializeCalendar() {
     document.getElementById('todayBtn').addEventListener('click', goToToday);
 
     // Safely handle the linkButton if it exists
-const familyFriendsButton = document.getElementById('familyFriendsButton');
+
 const phonicsButton = document.getElementById('phonicsButton');
 
-if (familyFriendsButton) {
-    familyFriendsButton.addEventListener('click', () => {
-        window.open("https://www.oxfordlearnersbookshelf.com/home/main.html", "_blank");
-    });
+if (homeworkButton) {
+   homeworkButton.addEventListener('click', () => {
+        window.open("https://huasiamacmillan.com/eeb/", "_blank");
+   });
 }
-
-//if (phonicsButton) {
-////    phonicsButton.addEventListener('click', () => {
- //       window.open("https://huasiamacmillan.com/phonics/", "_blank");
- //   });
-//}
     // Initial render of the calendar
     updateCalendarDisplay();
 }
@@ -269,7 +366,7 @@ function updatePhonicsUrl(className) {
     const phonicsButton = document.getElementById('phonicsButton');
     if (!phonicsButton) return;
 
-    //Extract grade number from class name
+    // Extract grade number from class name
     const gradeMatch = className.match(/^(\d+)/);
     if(gradeMatch) {
         const grade = gradeMatch[1];

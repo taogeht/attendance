@@ -4,51 +4,69 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Class Overview</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles/index.css">
 </head>
 <body>
     <div class="container">
-        <h1 id="teacherName"></h1>
-
-        <div id="classButtons" class="class-buttons">
-            <!-- Class buttons will be added here -->
+        <div class="header">
+            <h1 id="teacherName"></h1>
+            <div class="nav-buttons">
+                <button id="logoutBtn" class="nav-btn">Logout</button>
+            </div>
         </div>
+
+        <div class="class-buttons" id="classButtons"></div>
 
         <div class="overview-content">
-            <div class="student-list">
-                <h2 id="selectedClass"></h2>
-                <h3 id="selectedDate"></h3>
-                <button id="selectAll">Select All</button>
-                <ul id="studentList">
-                    <!-- Students will be listed here -->
-                </ul>
-                <button id="saveAttendance">Save Attendance</button>
+            <div class="calendar-section">
+                <div id="calendarNavigation" class="calendar-navigation"></div>
+                <div id="weekCalendar" class="calendar"></div>
             </div>
 
-            <div class="calendar">
-                <h3>Attendance Calendar</h3>
-                <div id="monthYearDisplay" class="month-year-display"></div>
-                <div id="weekCalendar"></div>
-                <div id="calendarNavigation">
-                    <button id="prevWeek" class="calendar-nav-btn">&lt; Previous Week</button>
-                    <button id="todayBtn" class="calendar-nav-btn today-btn">Today</button>
-                    <button id="nextWeek" class="calendar-nav-btn">Next Week &gt;</button>
+            <div class="student-section">
+                <h2 id="selectedClass"></h2>
+                <div class="student-controls">
+                    <button id="selectAll">Select All</button>
+                    <button id="saveAttendance">Save Attendance</button>
+                    <button id="removeAttendance">Remove Attendance</button>
+                    <button id="downloadMonthlyAttendance">Download Monthly Attendance</button>
                 </div>
-                <button id="familyFriendsButton" class="linkButton">Family and Friends</button>
-                <button id="phonicsButton" class="linkButton">Phonics</button>
-                <button id="readerButton" class="linkButton">Reader</button>
-                <button id="homeworkButton" class="linkButton">English Exercise Book</button>
+                <div id="studentList"></div>
             </div>
         </div>
 
-        <div class="navigation-buttons">
-            <a href="index.html" class="overview-button">Back to Teacher Selection</a>
+        <div class="button-container">
+            <a href="https://www.oxfordlearnersbookshelf.com/home/main.html" 
+               id="familyFriendsButton" 
+               class="linkButton" 
+               target="_blank">
+                Family and Friends Book
+            </a>
+            <a href="#" 
+               id="phonicsButton" 
+               class="linkButton" 
+               target="_blank">
+                Phonics Book
+            </a>
+            <a href="https://getepic.com/"
+               id="readerButton"
+               class="linkButton"
+               target="_blank">
+                Epic Reader
+            </a>
+            <a href="https://huasiamacmillan.com/eeb/"
+               id="homeworkButton"
+               class="linkButton"
+               target="_blank">
+                Homework Book
+            </a>
         </div>
     </div>
 
     <!-- Scripts -->
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="supabase-init.js"></script>
+    <script src="auth.js"></script>
     <script src="classOverview.js"></script>
 </body>
 </html>
