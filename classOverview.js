@@ -93,6 +93,25 @@ async function initializeApp() {
     const urlParams = new URLSearchParams(window.location.search);
     const teacherId = urlParams.get('teacher');
 
+    if (!teacherId) {
+        console.error('No teacher ID provided');
+        document.body.innerHTML = '<p>Error: No teacher selected. Please go back and select a teacher.</p>';
+        return;
+    }
+
+    // Show/hide admin panel button based on admin status
+    const isAdmin = localStorage.getItem('isAdmin') === 'true';
+    const adminPanelButton = document.getElementById('adminPanelButton');
+    if (adminPanelButton) {
+        adminPanelButton.style.display = isAdmin ? 'inline-block' : 'none';
+    }
+
+    // Safely add event listeners only if elements exist
+    const selectAllBtn = document.getElementById('selectAll');
+    const saveAttendanceBtn = document.getElementById('saveAttendance');
+    const downloadMonthlyBtn = document.getElementById('downloadMonthlyAttendance');
+    const removeAttendanceBtn = document.getElementById('removeAttendance');
+
     // Add logout button initialization
     const logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) {
@@ -125,10 +144,6 @@ async function initializeApp() {
     }
 
     // Safely add event listeners only if elements exist
-    const selectAllBtn = document.getElementById('selectAll');
-    const saveAttendanceBtn = document.getElementById('saveAttendance');
-    const downloadMonthlyBtn = document.getElementById('downloadMonthlyAttendance');
-    const removeAttendanceBtn = document.getElementById('removeAttendance');
     const phonicsButton = document.getElementById('phonicsButton');
     const readerButton = document.getElementById('readerButton');
     const homeworkButton = document.getElementById('homeworkButton');
@@ -165,12 +180,13 @@ async function initializeApp() {
 
     // Set up date change handler
     onDateChange = async (date) => {
-        selectedDate = date;
+        selectedDate = new Date(date);  // Create a new Date object to avoid reference issues
         updateSelectedDateDisplay();
         if (currentClass) {
-            await loadStudents(currentClass.id);
+            await loadAttendance(currentClass.id, selectedDate);  // Update attendance for the new date
         }
     };
+    
 }
 function createClassButtons(classes) {
     const classButtonsContainer = document.getElementById('classButtons');
@@ -240,8 +256,6 @@ function initializeCalendar() {
     document.getElementById('todayBtn').addEventListener('click', goToToday);
 
     // Safely handle the linkButton if it exists
-
-const phonicsButton = document.getElementById('phonicsButton');
 
 if (homeworkButton) {
    homeworkButton.addEventListener('click', () => {
@@ -381,6 +395,7 @@ function updatePhonicsUrl(className) {
     }
     
 }
+
 async function loadStudents(classId) {
     try {
         const { data: students, error } = await window.supabase
@@ -465,11 +480,12 @@ function updateSelectAllButtonState() {
 
 async function loadAttendance(classId, date) {
     try {
+        const dateString = date.toISOString().split('T')[0];
         const { data: attendance, error } = await window.supabase
             .from('attendance_records')
             .select('student_id, is_present')
             .eq('class_id', classId)
-            .eq('date', date.toISOString().split('T')[0]);
+            .eq('date', dateString);
 
         if (error) throw error;
 
@@ -481,12 +497,12 @@ async function loadAttendance(classId, date) {
             checkbox.checked = attendanceMap.has(studentId) ? attendanceMap.get(studentId) : false;
         });
 
-        // Update the select all button state after loading attendance
         updateSelectAllButtonState();
     } catch (error) {
         console.error('Error loading attendance:', error);
     }
 }
+
 
 function updateCalendarDisplay() {
     const weekCalendar = document.getElementById('weekCalendar');
@@ -556,7 +572,7 @@ function goToToday() {
 }
 
 async function selectDate(date) {
-    selectedDate = date;
+    selectedDate = new Date(date);  // Create a new Date object to avoid reference issues
     updateCalendarDisplay();
     if (typeof onDateChange === 'function') {
         await onDateChange(selectedDate);
@@ -616,11 +632,12 @@ function toggleSelectAll() {
 
 async function saveAttendance() {
     try {
+        const dateString = selectedDate.toISOString().split('T')[0];
         const checkboxes = document.querySelectorAll('.attendance-checkbox');
         const attendanceRecords = Array.from(checkboxes).map(checkbox => ({
             class_id: currentClass.id,
             student_id: checkbox.dataset.student,
-            date: selectedDate.toISOString().split('T')[0],
+            date: dateString,
             is_present: checkbox.checked
         }));
 
@@ -629,7 +646,7 @@ async function saveAttendance() {
             .from('attendance_records')
             .delete()
             .eq('class_id', currentClass.id)
-            .eq('date', selectedDate.toISOString().split('T')[0]);
+            .eq('date', dateString);
 
         if (deleteError) throw deleteError;
 

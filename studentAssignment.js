@@ -164,28 +164,33 @@ function initializeApp() {
                 result.innerHTML = '<p>Please select a class for import.</p>';
                 return;
             }
-
+    
             if (!fileInput.files[0]) {
                 result.innerHTML = '<p>Please select a CSV file to import.</p>';
                 return;
             }
-
+    
             const file = fileInput.files[0];
             const reader = new FileReader();
-
+    
             reader.onload = async function(e) {
                 const contents = e.target.result;
+                // Split by newlines and process each line
                 const students = contents.split(/\r\n|\n/)
-                    .map(name => name.trim())
-                    .filter(name => name !== '' && name !== ',');
+                    .map(line => {
+                        // Remove all commas and extra spaces
+                        return line.replace(/,/g, ' ')  // Replace commas with spaces
+                                 .replace(/\s+/g, ' ')  // Replace multiple spaces with single space
+                                 .trim();               // Remove leading/trailing spaces
+                    })
+                    .filter(name => name !== '');      // Remove empty lines
                 
                 let successCount = 0;
                 let failCount = 0;
-
+    
                 for (const studentName of students) {
-                    const cleanName = studentName.replace(/,+$/, '').trim();
-                    if (cleanName) {
-                        const success = await assignStudentToClass(cleanName, selectedClass);
+                    if (studentName) {
+                        const success = await assignStudentToClass(studentName, selectedClass);
                         if (success) {
                             successCount++;
                         } else {
@@ -193,21 +198,20 @@ function initializeApp() {
                         }
                     }
                 }
-
+    
                 result.innerHTML = `<p>Import complete. ${successCount} students added successfully. ${failCount} students failed (already in class or error occurred).</p>`;
                 displayStudentList(selectedClass);
-
+    
                 fileInput.value = '';
             };
-
+    
             reader.onerror = function() {
                 result.innerHTML = '<p>Error reading the CSV file.</p>';
             };
-
+    
             reader.readAsText(file);
         });
     }
-
     // Edit functionality
     if (editSelectedBtn) {
         editSelectedBtn.addEventListener('click', handleEditSelected);

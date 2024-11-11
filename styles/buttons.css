@@ -54,6 +54,12 @@ button,
     color: white;
 }
 
+#adminPanelButton {
+    background-color: #dc3545;
+    color: white;
+}
+
+
 /* Link Buttons */
 .linkButton {
     flex: 1;
