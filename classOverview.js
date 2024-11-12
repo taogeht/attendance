@@ -38,57 +38,8 @@ async function checkAuth() {
 document.addEventListener('DOMContentLoaded', () => {
     checkAuth();
 });
-document.addEventListener('DOMContentLoaded', function() {
-    const passwordForm = document.getElementById('passwordChangeForm');
-    const messageDiv = document.getElementById('passwordChangeMessage');
 
-    if (passwordForm) {
-        passwordForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
 
-            const currentPassword = document.getElementById('currentPassword').value;
-            const newPassword = document.getElementById('newPassword').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-
-            // Basic validation
-            if (!currentPassword || !newPassword || !confirmPassword) {
-                showPasswordMessage('Please fill in all fields', 'error');
-                return;
-            }
-
-            if (newPassword !== confirmPassword) {
-                showPasswordMessage('New passwords do not match', 'error');
-                return;
-            }
-
-            if (newPassword.length < 6) {
-                showPasswordMessage('New password must be at least 6 characters', 'error');
-                return;
-            }
-
-            const result = await changePassword(currentPassword, newPassword);
-            showPasswordMessage(result.message, result.success ? 'success' : 'error');
-
-            if (result.success) {
-                passwordForm.reset();
-            }
-        });
-    }
-
-    function showPasswordMessage(text, type) {
-        if (messageDiv) {
-            messageDiv.textContent = text;
-            messageDiv.className = `message ${type}`;
-            messageDiv.style.display = 'block';
-
-            if (type === 'success') {
-                setTimeout(() => {
-                    messageDiv.style.display = 'none';
-                }, 3000);
-            }
-        }
-    }
-});
 async function initializeApp() {
     const urlParams = new URLSearchParams(window.location.search);
     const teacherId = urlParams.get('teacher');

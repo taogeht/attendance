@@ -59,6 +59,11 @@ button,
     color: white;
 }
 
+#passwordButton {
+    background-color: #dc3545;
+    color: white;
+}
+
 
 /* Link Buttons */
 .linkButton {
