@@ -34,11 +34,21 @@ async function checkAuth() {
     }
 }
 
-// Call this when the page loads
-document.addEventListener('DOMContentLoaded', () => {
-    checkAuth();
-});
-
+// Initialize the app when the DOM is loaded
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', async () => {
+        await checkAuth();  // Check auth first
+        await initializeApp();  // Then initialize app
+        initializeSidebarLinks();  // Finally set up sidebar
+    });
+} else {
+    // If DOM is already loaded, execute immediately but still maintain order
+    (async () => {
+        await checkAuth();
+        await initializeApp();
+        initializeSidebarLinks();
+    })();
+}
 
 async function initializeApp() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -61,7 +71,6 @@ async function initializeApp() {
     const selectAllBtn = document.getElementById('selectAll');
     const saveAttendanceBtn = document.getElementById('saveAttendance');
     const downloadMonthlyBtn = document.getElementById('downloadMonthlyAttendance');
-    const removeAttendanceBtn = document.getElementById('removeAttendance');
 
     // Add logout button initialization
     const logoutBtn = document.getElementById('logoutBtn');
@@ -111,10 +120,6 @@ async function initializeApp() {
         downloadMonthlyBtn.addEventListener('click', downloadMonthlyAttendance);
     }
     
-    if (removeAttendanceBtn) {
-        removeAttendanceBtn.addEventListener('click', removeAttendance);
-    }
-
     if (readerButton) {
         readerButton.addEventListener('click', () => {
             window.open("http://getepic.com/", "_blank");
@@ -139,6 +144,63 @@ async function initializeApp() {
     };
     
 }
+
+function initializeSidebarLinks() {
+    const adminPanelButton = document.getElementById('adminPanelButton');
+    const isAdmin = localStorage.getItem('isAdmin') === 'true';
+    if (adminPanelButton && isAdmin) {
+        adminPanelButton.style.display = 'flex';  // Show the button
+    }
+
+    // Resource links
+    const familyFriendsButton = document.getElementById('familyFriendsButton');
+    if (familyFriendsButton) {
+        familyFriendsButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('Family and Friends button clicked'); // Debug log
+            window.open('https://www.oxfordlearnersbookshelf.com/home/main.html', '_blank');
+        });
+    } else {
+        console.log('Family and Friends button not found'); // Debug log
+    }
+
+
+    document.getElementById('phonicsButton')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        // This will be updated by updatePhonicsUrl when a class is selected
+        window.open("https://huasiamacmillan.com/phonics/", "_blank");
+    });
+
+    document.getElementById('readerButton')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.open("http://getepic.com/", "_blank");
+    });
+
+    document.getElementById('homeworkButton')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.open("https://huasiamacmillan.com/eeb/", "_blank");
+    });
+
+    // Logout handler
+    document.getElementById('logoutBtn')?.addEventListener('click', async (e) => {
+        e.preventDefault();
+        try {
+            const sessionToken = localStorage.getItem('sessionToken');
+            if (sessionToken) {
+                await window.supabase
+                    .from('active_sessions')
+                    .delete()
+                    .eq('session_token', sessionToken);
+            }
+            localStorage.clear();
+            window.location.href = 'login.html';
+        } catch (error) {
+            console.error('Logout error:', error);
+            window.location.href = 'login.html';
+        }
+    });
+}
+
 function createClassButtons(classes) {
     const classButtonsContainer = document.getElementById('classButtons');
     classButtonsContainer.innerHTML = '';
@@ -618,46 +680,7 @@ async function saveAttendance() {
         alert('Error saving attendance. Please try again.');
     }
 }
-async function removeAttendance() {
-    try {
-        if (!currentClass || !currentClass.id) {
-            alert('Please select a class first');
-            return;
-        }
 
-        // Confirm with the user before deleting
-        const confirmDelete = confirm(`Are you sure you want to remove all attendance records for ${selectedDate.toLocaleDateString('en-US', { 
-            weekday: 'long',
-            month: 'long',
-            day: 'numeric',
-            year: 'numeric'
-        })}?`);
-
-        if (!confirmDelete) {
-            return;
-        }
-
-        // Delete attendance records for the selected date and class
-        const { error } = await window.supabase
-            .from('attendance_records')
-            .delete()
-            .eq('class_id', currentClass.id)
-            .eq('date', selectedDate.toISOString().split('T')[0]);
-
-        if (error) throw error;
-
-        // Reset all checkboxes to unchecked state
-        const checkboxes = document.querySelectorAll('.attendance-checkbox');
-        checkboxes.forEach(checkbox => {
-            checkbox.checked = false; // Reset to unchecked state
-        });
-
-        alert('Attendance records removed successfully!');
-    } catch (error) {
-        console.error('Error removing attendance:', error);
-        alert('Error removing attendance records. Please try again.');
-    }
-}
 async function downloadMonthlyAttendance() {
     try {
         const firstDay = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
@@ -751,9 +774,3 @@ async function downloadMonthlyAttendance() {
 
 
 
-// Initialize the app when the DOM is loaded
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeApp);
-} else {
-    initializeApp();
-}

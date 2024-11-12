@@ -79,3 +79,33 @@ button,
     border: none;
     cursor: pointer;
 }
+
+/* Action Buttons */
+.action-btn {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    background: #4CAF50;
+    color: white;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.action-btn:hover {
+    background: #45a049;
+}
+
+.action-btn.danger {
+    background-color: #f44336;
+}
+
+.action-btn.danger:hover {
+    background-color: #d32f2f;
+}
+
+.attendance-actions {
+    margin-top: 20px;
+}
