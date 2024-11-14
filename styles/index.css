@@ -12,6 +12,8 @@
 @import 'modal.css';
 @import 'accordion.css';
 @import 'login.css';
+@import 'scheduleManager.css';
+@import 'schedule.css';
 
 /* Responsive styles should be last to override other styles */
 @import 'responsive.css';
