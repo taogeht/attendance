@@ -441,7 +441,13 @@ async function loadStudents(classId) {
         if (error) throw error;
 
         const studentList = document.getElementById('studentList');
-        studentList.innerHTML = '';
+        studentList.innerHTML = ''; // Clear everything first
+
+        // Remove any existing attendance-actions if they exist elsewhere
+        const existingActions = document.querySelector('.attendance-actions');
+        if (existingActions) {
+            existingActions.remove();
+        }
 
         if (students.length === 0) {
             studentList.innerHTML = '<li>No students assigned to this class.</li>';
