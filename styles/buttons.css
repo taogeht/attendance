@@ -81,22 +81,25 @@ button,
 }
 
 /* Action Buttons */
+/* Action Buttons */
 .action-btn {
-    width: 100%;
-    padding: 10px;
-    margin: 10px 0;
+    padding: 12px;
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    background: #4CAF50;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    background-color: #4CAF50;
     color: white;
-    font-size: 16px;
-    transition: background-color 0.3s ease;
+    text-align: center;
 }
 
 .action-btn:hover {
-    background: #45a049;
+    background-color: #45a049;
+    transform: translateY(-1px);
 }
+
 
 .action-btn.danger {
     background-color: #f44336;
@@ -108,4 +111,12 @@ button,
 
 .attendance-actions {
     margin-top: 20px;
+}
+
+/* Student Actions Container */
+.student-actions {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
 }

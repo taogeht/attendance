@@ -622,36 +622,40 @@ async function showClassAssignmentModal(slotId, dayId) {
         const { data: existingSchedules, error: schedulesError } = await window.supabase
             .from('class_schedules')
             .select(`
+                day_of_week,
                 schedule_classes (
                     teacher_id
                 )
             `)
-            .eq('time_slot_id', slotId)
-            .eq('day_of_week', dayId);
+            .eq('time_slot_id', slotId);
 
         if (schedulesError) throw schedulesError;
 
-        const busyTeacherIds = existingSchedules
-            .map(schedule => schedule.schedule_classes?.teacher_id)
-            .filter(id => id != null);
+        // Create a map of busy teachers by day
+        const busyTeachersByDay = {};
+        existingSchedules.forEach(schedule => {
+            if (!busyTeachersByDay[schedule.day_of_week]) {
+                busyTeachersByDay[schedule.day_of_week] = new Set();
+            }
+            if (schedule.schedule_classes?.teacher_id) {
+                busyTeachersByDay[schedule.day_of_week].add(schedule.schedule_classes.teacher_id);
+            }
+        });
 
         // Filter available teachers
         const availableTeachers = allTeachers.filter(teacher => {
             const hasTimePreference = timeSlot.is_morning ? 
                 teacher.teaches_morning : 
                 teacher.teaches_afternoon;
-            const isAvailable = !busyTeacherIds.includes(teacher.id);
-            return hasTimePreference && isAvailable;
+            return hasTimePreference;
         });
-
-        const dayName = DAYS_OF_WEEK.find(d => d.id === dayId)?.name;
 
         modal.style.display = 'block';
         modal.innerHTML = `
             <div class="modal-content">
                 <span class="close-button" onclick="closeModal()">×</span>
                 <h3>Assign Class to ${timeSlot.slot_name}</h3>
-                <p>${dayName} ${formatTimeRange(timeSlot.start_time, timeSlot.end_time)}</p>
+                <p>${formatTimeRange(timeSlot.start_time, timeSlot.end_time)}</p>
                 
                 <div class="form-group">
                     <label for="classSelect">Select Class:</label>
@@ -673,9 +677,29 @@ async function showClassAssignmentModal(slotId, dayId) {
                     </select>
                 </div>
 
+                <div class="form-group">
+                    <label class="block-label">Select Days:</label>
+                    <div class="days-selection">
+                        ${DAYS_OF_WEEK.map(day => {
+                            const isAvailable = availableTeachers.some(teacher => 
+                                !busyTeachersByDay[day.id]?.has(teacher.id)
+                            );
+                            return `
+                                <label class="day-checkbox ${!isAvailable ? 'disabled' : ''}">
+                                    <input type="checkbox" 
+                                           value="${day.id}" 
+                                           ${day.id === dayId ? 'checked' : ''}
+                                           ${!isAvailable ? 'disabled' : ''}>
+                                    ${day.name}
+                                </label>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+
                 <div class="modal-buttons">
                     <button onclick="closeModal()" class="btn-secondary">Cancel</button>
-                    <button onclick="handleAssignment(${slotId}, ${dayId})" class="btn-primary">Assign</button>
+                    <button onclick="handleMultiDayAssignment(${slotId})" class="btn-primary">Assign</button>
                 </div>
             </div>
         `;
@@ -707,6 +731,59 @@ async function handleAssignment(slotId, dayId) {
         showError('Failed to assign class and teacher');
     }
 }
+
+async function handleMultiDayAssignment(slotId) {
+    const classSelect = document.getElementById('classSelect');
+    const teacherSelect = document.getElementById('teacherSelect');
+    const selectedDays = Array.from(document.querySelectorAll('.day-checkbox input:checked'))
+        .map(checkbox => parseInt(checkbox.value));
+
+    if (!classSelect.value || !teacherSelect.value) {
+        showError('Please select both a class and a teacher');
+        return;
+    }
+
+    if (selectedDays.length === 0) {
+        showError('Please select at least one day');
+        return;
+    }
+
+    try {
+        const classId = parseInt(classSelect.value);
+        const teacherId = parseInt(teacherSelect.value);
+
+        // Create schedule entries for all selected days
+        const scheduleEntries = selectedDays.map(dayId => ({
+            class_id: classId,
+            time_slot_id: slotId,
+            day_of_week: dayId
+        }));
+
+        // Update the class with the teacher
+        const { error: updateError } = await window.supabase
+            .from('schedule_classes')
+            .update({ teacher_id: teacherId })
+            .eq('id', classId);
+
+        if (updateError) throw updateError;
+
+        // Create all schedule entries
+        const { error: scheduleError } = await window.supabase
+            .from('class_schedules')
+            .insert(scheduleEntries);
+
+        if (scheduleError) throw scheduleError;
+
+        closeModal();
+        showSuccess(`Class assigned to ${selectedDays.length} day(s) successfully`);
+        await loadScheduleData();
+
+    } catch (error) {
+        console.error('Error in handleMultiDayAssignment:', error);
+        showError('Failed to assign class to selected days');
+    }
+}
+
 async function assignClassAndTeacher(slotId, dayId, classId, teacherId) {
     try {
         // Check for existing schedule

@@ -2,7 +2,7 @@
 
 let currentClass = null;
 let selectedDate = new Date();
-let currentWeekStart = getWeekStart(new Date());
+//let currentWeekStart = getWeekStart(new Date());
 let onDateChange = null;
 
 // Add this to the top of each page's JavaScript files
@@ -203,40 +203,48 @@ function initializeSidebarLinks() {
 
 function createClassButtons(classes) {
     const classButtonsContainer = document.getElementById('classButtons');
+    if (!classButtonsContainer) return;
+    
     classButtonsContainer.innerHTML = '';
     
-    // Helper function to safely extract class number and letter
-    const extractClassInfo = (className) => {
-        const match = className.match(/(\d+)([A-Za-z])/);
-        return {
-            number: match ? match[1] : '0',
-            letter: match ? match[2] : 'A'
-        };
+    if (classes.length === 0) {
+        classButtonsContainer.innerHTML = '<p>No classes assigned to this teacher.</p>';
+        clearCalendar();
+        return;
+    }
+
+    // Helper functions for sorting (keep existing sort logic)
+    const getClassNumber = (className) => {
+        const match = className.match(/^(\d+)/);
+        return match ? parseInt(match[1], 10) : 0;
+    };
+
+    const getClassLetter = (className) => {
+        const match = className.match(/[A-Z]$/);
+        return match ? match[0] : '';
     };
     
-    // Sort classes safely
-    const sortedClasses = classes.sort((a, b) => {
-        const aInfo = extractClassInfo(a.name);
-        const bInfo = extractClassInfo(b.name);
+    // Sort classes
+    const sortedClasses = [...classes].sort((a, b) => {
+        const numA = getClassNumber(a.name);
+        const numB = getClassNumber(b.name);
         
-        // Compare numbers first
-        const numCompare = parseInt(aInfo.number) - parseInt(bInfo.number);
-        if (numCompare !== 0) return numCompare;
+        if (numA !== numB) {
+            return numA - numB;
+        }
         
-        // If numbers are the same, compare letters
-        return aInfo.letter.localeCompare(bInfo.letter);
+        const letterA = getClassLetter(a.name);
+        const letterB = getClassLetter(b.name);
+        return letterA.localeCompare(letterB);
     });
-
+    
+    // Create buttons
     sortedClasses.forEach(cls => {
         const button = document.createElement('button');
         button.textContent = cls.name;
-        button.classList.add('class-btn');
-        
-        // Safely add data attributes
-        const classInfo = extractClassInfo(cls.name);
-        button.dataset.classNumber = classInfo.number;
-        button.dataset.classLetter = classInfo.letter;
-        
+        button.className = 'class-btn';
+        button.dataset.classNumber = getClassNumber(cls.name);
+        button.dataset.classLetter = getClassLetter(cls.name);
         button.addEventListener('click', () => selectClass(cls.id));
         classButtonsContainer.appendChild(button);
     });
@@ -369,24 +377,35 @@ function createClassButtons(classes) {
 }
 
 async function selectClass(classId) {
-    currentClass = { id: classId };
-    const { data, error } = await window.supabase
-        .from('classes')
-        .select('name')
-        .eq('id', classId)
-        .single();
+    try {
+        const { data, error } = await window.supabase
+            .from('classes')
+            .select('name')
+            .eq('id', classId)
+            .single();
 
-    if (error) {
-        console.error('Error fetching class name:', error);
-        return;
+        if (error) {
+            console.error('Error fetching class name:', error);
+            return;
+        }
+
+        // Update current class
+        currentClass = { id: classId, name: data.name };
+        
+        // Update UI elements
+        document.getElementById('selectedClass').textContent = `Students in ${currentClass.name}`;
+        updatePhonicsUrl(currentClass.name);
+
+        // Load students and update calendar
+        await Promise.all([
+            loadStudents(classId),
+            updateCalendarDisplay() // Add calendar update here
+        ]);
+
+    } catch (error) {
+        console.error('Error in selectClass:', error);
+        document.getElementById('selectedClass').textContent = 'Error loading class';
     }
-
-    currentClass.name = data.name;
-    document.getElementById('selectedClass').textContent = `Students in ${currentClass.name}`;
-    
-    updatePhonicsUrl(currentClass.name);
-
-    await loadStudents(classId);
 }
 
 function updatePhonicsUrl(className) {
@@ -429,7 +448,17 @@ async function loadStudents(classId) {
             return;
         }
 
-        // Create single accordion section
+        // Add action buttons before the accordion
+        const actionButtons = document.createElement('div');
+        actionButtons.className = 'student-actions';
+        actionButtons.innerHTML = `
+            <button id="selectAll" class="action-btn">Select All</button>
+            <button id="saveAttendance" class="action-btn">Save Attendance</button>
+            <button id="downloadMonthlyAttendance" class="action-btn">Download Monthly Attendance</button>
+        `;
+        studentList.appendChild(actionButtons);
+
+        // Create accordion section for students
         const section = document.createElement('div');
         section.className = 'accordion-section';
 
@@ -462,7 +491,7 @@ async function loadStudents(classId) {
         section.appendChild(content);
         studentList.appendChild(section);
 
-        // Add click event
+        // Add click event for accordion
         header.addEventListener('click', () => {
             section.classList.toggle('active');
             const expandIcon = header.querySelector('.expand-icon');
@@ -476,11 +505,18 @@ async function loadStudents(classId) {
             }
         });
 
+        // Add event listeners for buttons
+        document.getElementById('selectAll').addEventListener('click', toggleSelectAll);
+        document.getElementById('saveAttendance').addEventListener('click', saveAttendance);
+        document.getElementById('downloadMonthlyAttendance').addEventListener('click', downloadMonthlyAttendance);
+
+        // Load attendance for the selected date
         await loadAttendance(classId, selectedDate);
 
     } catch (error) {
         console.error('Error loading students:', error);
-        document.getElementById('studentList').innerHTML = '<li>Error loading students. Please try again later.</li>';
+        document.getElementById('studentList').innerHTML = 
+            '<li>Error loading students. Please try again later.</li>';
     }
 }
 
@@ -493,7 +529,7 @@ function updateSelectAllButtonState() {
 
 async function loadAttendance(classId, date) {
     try {
-        const dateString = date.toISOString().split('T')[0];
+        const dateString = formatDateToString(date);
         const { data: attendance, error } = await window.supabase
             .from('attendance_records')
             .select('student_id, is_present')
@@ -516,136 +552,128 @@ async function loadAttendance(classId, date) {
     }
 }
 
+function isSameDate(date1, date2) {
+    return formatDateToString(date1) === formatDateToString(date2);
+}
 
-function updateCalendarDisplay() {
+// Function to get the first day of the month
+function getFirstDayOfMonth(date) {
+    return new Date(date.getFullYear(), date.getMonth(), 1);
+}
+
+// Function to get the number of days in a month
+function getDaysInMonth(date) {
+    return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+}
+
+// Function to get the day of week (0-6) for the first day of the month
+function getFirstDayOfWeek(date) {
+    return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+}
+
+async function updateCalendarDisplay() {
     const weekCalendar = document.getElementById('weekCalendar');
+    if (!weekCalendar) return;
+
     weekCalendar.innerHTML = '';
 
-    // Create calendar days directly without the header row
-    const daysContainer = document.createElement('div');
-    daysContainer.className = 'calendar-days';
+    // Create header row for days of the week
+    const daysHeader = document.createElement('div');
+    daysHeader.className = 'calendar-header';
+    const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     
-    for (let i = 0; i < 7; i++) {
-        const date = new Date(currentWeekStart);
-        date.setDate(currentWeekStart.getDate() + i);
-        
+    daysOfWeek.forEach(day => {
+        const dayHeader = document.createElement('div');
+        dayHeader.className = 'calendar-header-cell';
+        dayHeader.textContent = day;
+        daysHeader.appendChild(dayHeader);
+    });
+    weekCalendar.appendChild(daysHeader);
+
+    // Fetch attendance data for the month if we have a current class
+    let attendanceMap = new Map();
+    if (currentClass && currentClass.id) {
+        attendanceMap = await getMonthlyAttendance(
+            currentClass.id,
+            selectedDate.getFullYear(),
+            selectedDate.getMonth()
+        );
+    }
+
+    // Create calendar grid
+    const calendarGrid = document.createElement('div');
+    calendarGrid.className = 'calendar-grid';
+
+    const firstDay = getFirstDayOfMonth(selectedDate);
+    const daysInMonth = getDaysInMonth(selectedDate);
+    const startDay = getFirstDayOfWeek(selectedDate);
+
+    // Add days from previous month
+    const prevMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1, 1);
+    const daysInPrevMonth = getDaysInMonth(prevMonth);
+    const prevMonthStartDay = daysInPrevMonth - startDay + 1;
+
+    for (let i = 0; i < startDay; i++) {
+        const dayElement = document.createElement('div');
+        dayElement.className = 'calendar-day other-month';
+        dayElement.textContent = prevMonthStartDay + i;
+        calendarGrid.appendChild(dayElement);
+    }
+
+    // Add days of current month
+    for (let i = 1; i <= daysInMonth; i++) {
         const dayElement = document.createElement('div');
         dayElement.className = 'calendar-day';
+        const currentDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), i);
         
-        if (isToday(date)) {
+        if (isToday(currentDate)) {
             dayElement.classList.add('today');
         }
-        if (isSameDate(date, selectedDate)) {
+        if (isSameDate(currentDate, selectedDate)) {
             dayElement.classList.add('selected');
         }
-        if (!isCurrentMonth(date)) {
-            dayElement.classList.add('other-month');
+
+        // Create the date content container
+        const dateContent = document.createElement('div');
+        dateContent.className = 'date-content';
+
+        // Add the date number
+        const dateNumber = document.createElement('div');
+        dateNumber.className = 'date-number';
+        dateNumber.textContent = i;
+        dateContent.appendChild(dateNumber);
+
+        // Add attendance indicator if we have data for this date
+        const dateStr = formatDateToString(currentDate);
+        if (attendanceMap.has(dateStr)) {
+            const attendanceIndicator = document.createElement('div');
+            attendanceIndicator.className = 'attendance-indicator';
+            attendanceIndicator.textContent = `P:${attendanceMap.get(dateStr)}`;
+            dateContent.appendChild(attendanceIndicator);
         }
 
-        // Include weekday abbreviation in the date text
-        dayElement.innerHTML = `
-            <span class="date-text">${date.toLocaleDateString('en-US', { 
-                weekday: 'short',
-                month: 'short',
-                day: 'numeric'
-            })}</span>
-        `;
-
-        dayElement.addEventListener('click', () => selectDate(date));
-        daysContainer.appendChild(dayElement);
+        dayElement.appendChild(dateContent);
+        dayElement.addEventListener('click', () => selectDate(currentDate));
+        calendarGrid.appendChild(dayElement);
     }
-    weekCalendar.appendChild(daysContainer);
-}
 
-function changeMonth(direction) {
-    currentWeekStart.setMonth(currentWeekStart.getMonth() + direction);
-    currentWeekStart = getWeekStart(currentWeekStart);
-    updateCalendarDisplay();
-    if (typeof onDateChange === 'function') {
-        onDateChange(selectedDate);
+    // Add remaining days for next month
+    const totalCells = 42; // 6 rows * 7 days
+    const remainingCells = totalCells - (startDay + daysInMonth);
+    for (let i = 1; i <= remainingCells; i++) {
+        const dayElement = document.createElement('div');
+        dayElement.className = 'calendar-day other-month';
+        dayElement.textContent = i;
+        calendarGrid.appendChild(dayElement);
     }
+
+    weekCalendar.appendChild(calendarGrid);
 }
 
-function changeWeek(direction) {
-    currentWeekStart.setDate(currentWeekStart.getDate() + (direction * 7));
-    updateCalendarDisplay();
-    if (typeof onDateChange === 'function') {
-        onDateChange(selectedDate);
-    }
-}
-
-function goToToday() {
-    const today = new Date();
-    currentWeekStart = getWeekStart(today);
-    selectedDate = today;
-    updateCalendarDisplay();
-    if (typeof onDateChange === 'function') {
-        onDateChange(selectedDate);
-    }
-}
-
-async function selectDate(date) {
-    selectedDate = new Date(date);  // Create a new Date object to avoid reference issues
-    updateCalendarDisplay();
-    if (typeof onDateChange === 'function') {
-        await onDateChange(selectedDate);
-        // Update select all button state after date change
-        updateSelectAllButtonState();
-    }
-}
-
-// Helper functions
-function getWeekStart(date) {
-    const newDate = new Date(date);
-    const day = newDate.getDay();
-    const diff = newDate.getDate() - day;
-    newDate.setDate(diff);
-    return newDate;
-}
-
-function isToday(date) {
-    const today = new Date();
-    return isSameDate(date, today);
-}
-
-function isSameDate(date1, date2) {
-    return date1.getDate() === date2.getDate() &&
-           date1.getMonth() === date2.getMonth() &&
-           date1.getFullYear() === date2.getFullYear();
-}
-
-function isCurrentMonth(date) {
-    const currentMonth = currentWeekStart.getMonth();
-    return date.getMonth() === currentMonth;
-}
-
-// Function to update the selected date display
-function updateSelectedDateDisplay() {
-    const monthYearDisplay = document.getElementById('monthYearDisplay');
-    if (monthYearDisplay) {
-        monthYearDisplay.textContent = selectedDate.toLocaleDateString('en-US', { 
-            weekday: 'long',
-            month: 'long',
-            day: 'numeric',
-            year: 'numeric'
-        });
-    }
-}
-function toggleSelectAll() {
-    const checkboxes = document.querySelectorAll('.attendance-checkbox');
-    const selectAllButton = document.getElementById('selectAll');
-    const allChecked = Array.from(checkboxes).every(checkbox => checkbox.checked);
-
-    checkboxes.forEach(checkbox => {
-        checkbox.checked = !allChecked;
-    });
-
-    selectAllButton.textContent = allChecked ? 'Select All' : 'Deselect All';
-}
 
 async function saveAttendance() {
     try {
-        const dateString = selectedDate.toISOString().split('T')[0];
+        const dateString = formatDateToString(selectedDate);
         const checkboxes = document.querySelectorAll('.attendance-checkbox');
         const attendanceRecords = Array.from(checkboxes).map(checkbox => ({
             class_id: currentClass.id,
@@ -675,11 +703,226 @@ async function saveAttendance() {
         }
 
         alert('Attendance saved successfully!');
+        
+        // Update calendar display to show new attendance data
+        await updateCalendarDisplay();
     } catch (error) {
         console.error('Error saving attendance:', error);
         alert('Error saving attendance. Please try again.');
     }
 }
+
+
+function initializeCalendar() {
+    const calendarNavigation = document.getElementById('calendarNavigation');
+    if (!calendarNavigation) return;
+    
+    // Update navigation to show only prev/next month buttons
+    calendarNavigation.innerHTML = `
+        <button id="prevMonth" class="calendar-nav-btn">&lt; Previous Month</button>
+        <button id="nextMonth" class="calendar-nav-btn">Next Month &gt;</button>
+    `;
+
+    // Add month/year display if it doesn't exist
+    let monthYearDisplay = document.getElementById('monthYearDisplay');
+    if (!monthYearDisplay) {
+        monthYearDisplay = document.createElement('div');
+        monthYearDisplay.id = 'monthYearDisplay';
+        monthYearDisplay.className = 'month-year-display';
+        const weekCalendar = document.getElementById('weekCalendar');
+        if (weekCalendar) {
+            weekCalendar.parentNode.insertBefore(monthYearDisplay, weekCalendar);
+        }
+    }
+
+    // Add event listeners for navigation
+    document.getElementById('prevMonth')?.addEventListener('click', () => changeMonth(-1));
+    document.getElementById('nextMonth')?.addEventListener('click', () => changeMonth(1));
+
+    // Initial render
+    updateCalendarDisplay();
+}
+
+function formatDateToString(date) {
+    // Create a new date object and set it to midnight in the local timezone
+    const localDate = new Date(date);
+    localDate.setHours(0, 0, 0, 0);
+    
+    // Get year, month, and day
+    const year = localDate.getFullYear();
+    // Month is 0-based, so add 1
+    const month = (localDate.getMonth() + 1).toString().padStart(2, '0');
+    const day = localDate.getDate().toString().padStart(2, '0');
+    
+    // Return in YYYY-MM-DD format
+    return `${year}-${month}-${day}`;
+}
+
+function isToday(date) {
+    const today = new Date();
+    return isSameDate(date, today);
+}
+
+function isSameDate(date1, date2) {
+    return date1.getDate() === date2.getDate() &&
+           date1.getMonth() === date2.getMonth() &&
+           date1.getFullYear() === date2.getFullYear();
+}
+
+function isCurrentMonth(date) {
+    const currentMonth = currentWeekStart.getMonth();
+    return date.getMonth() === currentMonth;
+}
+
+async function selectDate(date) {
+    selectedDate = new Date(date);
+    updateSelectedDateDisplay();
+    await updateCalendarDisplay();
+    
+    // Update attendance for the new date if we have a current class
+    if (currentClass && currentClass.id) {
+        await loadAttendance(currentClass.id, selectedDate);
+    }
+}
+
+function clearCalendar() {
+    const weekCalendar = document.getElementById('weekCalendar');
+    if (weekCalendar) {
+        weekCalendar.innerHTML = '';
+    }
+    
+    const monthYearDisplay = document.getElementById('monthYearDisplay');
+    if (monthYearDisplay) {
+        monthYearDisplay.textContent = '';
+    }
+}
+
+async function changeMonth(direction) {
+    selectedDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + direction, 1);
+    updateSelectedDateDisplay();
+    await updateCalendarDisplay(); // Make sure this is awaited
+    
+    // Update attendance for the new date if we have a current class
+    if (currentClass && currentClass.id) {
+        await loadAttendance(currentClass.id, selectedDate);
+    }
+}
+
+function updateSelectedDateDisplay() {
+    const monthYearDisplay = document.getElementById('monthYearDisplay');
+    if (monthYearDisplay) {
+        monthYearDisplay.textContent = selectedDate.toLocaleDateString('en-US', { 
+            month: 'long',
+            year: 'numeric'
+        });
+    }
+}
+
+
+// Function to update the selected date display
+function updateSelectedDateDisplay() {
+    const monthYearDisplay = document.getElementById('monthYearDisplay');
+    if (monthYearDisplay) {
+        monthYearDisplay.textContent = selectedDate.toLocaleDateString('en-US', { 
+            weekday: 'long',
+            month: 'long',
+            day: 'numeric',
+            year: 'numeric'
+        });
+    }
+}
+function toggleSelectAll() {
+    const checkboxes = document.querySelectorAll('.attendance-checkbox');
+    const selectAllButton = document.getElementById('selectAll');
+    const allChecked = Array.from(checkboxes).every(checkbox => checkbox.checked);
+
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = !allChecked;
+    });
+
+    selectAllButton.textContent = allChecked ? 'Select All' : 'Deselect All';
+}
+
+async function saveAttendance() {
+    try {
+        const dateString = formatDateToString(selectedDate);
+        const checkboxes = document.querySelectorAll('.attendance-checkbox');
+        const attendanceRecords = Array.from(checkboxes).map(checkbox => ({
+            class_id: currentClass.id,
+            student_id: checkbox.dataset.student,
+            date: dateString,
+            is_present: checkbox.checked
+        }));
+
+        // Delete existing records for this class and date
+        const { error: deleteError } = await window.supabase
+            .from('attendance_records')
+            .delete()
+            .eq('class_id', currentClass.id)
+            .eq('date', dateString);
+
+        if (deleteError) throw deleteError;
+
+        // Only insert records for checked students
+        const recordsToInsert = attendanceRecords.filter(record => record.is_present);
+        
+        if (recordsToInsert.length > 0) {
+            const { error: insertError } = await window.supabase
+                .from('attendance_records')
+                .insert(recordsToInsert);
+
+            if (insertError) throw insertError;
+        }
+
+        alert('Attendance saved successfully!');
+        
+        // Explicitly refresh the calendar with the current class and date
+        await updateCalendarDisplay();
+        
+        // Also refresh the attendance checkboxes to ensure everything is in sync
+        if (currentClass && currentClass.id) {
+            await loadAttendance(currentClass.id, selectedDate);
+        }
+    } catch (error) {
+        console.error('Error saving attendance:', error);
+        alert('Error saving attendance. Please try again.');
+    }
+}
+
+async function getMonthlyAttendance(classId, year, month) {
+    try {
+        // Create start and end dates for the month
+        const startDate = formatDateToString(new Date(year, month, 1));
+        const endDate = formatDateToString(new Date(year, month + 1, 0));
+
+        const { data: attendance, error } = await window.supabase
+            .from('attendance_records')
+            .select('date, is_present')
+            .eq('class_id', classId)
+            .gte('date', startDate)
+            .lte('date', endDate);
+
+        if (error) throw error;
+
+        // Create a map of date -> present count
+        const attendanceMap = new Map();
+        attendance.forEach(record => {
+            const dateStr = record.date;
+            if (!attendanceMap.has(dateStr)) {
+                attendanceMap.set(dateStr, 0);
+            }
+            if (record.is_present) {
+                attendanceMap.set(dateStr, attendanceMap.get(dateStr) + 1);
+            }
+        });
+
+        return attendanceMap;
+    } catch (error) {
+        console.error('Error fetching monthly attendance:', error);
+        return new Map();
+    }
+}
+
 
 async function downloadMonthlyAttendance() {
     try {
