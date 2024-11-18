@@ -1,0 +1,5 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/bryce603/brycecodes.com/atendance-1/
+    - /bin/cp -R attendance $DEPLOYPATH
