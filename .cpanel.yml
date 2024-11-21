@@ -1,7 +1,10 @@
 deployment:
   tasks:
     - export DEPLOYPATH=/home/bryce603/brycecodes.com/attendance-1/
-    - /bin/cp -R * $DEPLOYPATH
-  branch: main # or 'main' depending on your default branch name
+    - /bin/git fetch --all
+    - /bin/git reset --hard origin/main
+    - echo "Deployment complete!"
+  branch: main
   remote_host: github.com
+  remote: https://github.com/taogeht/attendance.git
   protocol: https
