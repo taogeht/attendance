@@ -1,13 +1,24 @@
-/* Accordion Styles */
+/* accordion.css */
 
+/* Accordion Container */
+.accordion-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+}
+
+/* Accordion Section */
 .accordion-section {
-    margin-top: 10px;
     background: white;
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-top: 10px;
 }
 
+/* Header Styles */
 .accordion-header {
     background: #f8f9fa;
     padding: 15px 20px;
@@ -22,15 +33,19 @@
 
 .header-content {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    gap: 20px;
+    gap: 12px;
 }
 
 .class-title {
     font-weight: bold;
     color: #333;
     flex: 1;
+}
+
+.teacher-name {
+    color: #666;
+    font-size: 0.9em;
 }
 
 .expand-icon {
@@ -43,6 +58,7 @@
     transform: rotate(180deg);
 }
 
+/* Content Area */
 .accordion-content {
     padding: 0;
     max-height: 0;
@@ -55,73 +71,26 @@
     overflow-y: auto;
 }
 
-/* Student List within Accordion */
+/* Student List */
 .student-list {
     list-style: none;
     padding: 0;
     margin: 0;
 }
 
-.student-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 20px;
-    border-bottom: 1px solid #eee;
-}
-
-.student-row:last-child {
-    border-bottom: none;
-}
-
-.student-name {
-    flex: 1;
-    margin-right: 15px;
-}
-
-.attendance-checkbox {
-    width: 20px;
-    height: 20px;
-    margin: 0;
-    cursor: pointer;
-}
-
-/* Attendance Summary */
-.attendance-summary {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px 0;
-    gap: 15px;
-    font-size: 0.9em;
-}
-
-.attendance-summary span {
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-weight: 500;
-}
-
-.attendance-summary .present {
-    color: #4CAF50;
-}
-
-.attendance-summary .absent {
-    color: #f44336;
-}
-
-.attendance-summary .total {
-    color: #2196F3;
-}
-
-/* Attendance Status Styles */
 .student-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 8px;
+    padding: 10px 15px;
     border-bottom: 1px solid #eee;
 }
 
+.student-item:last-child {
+    border-bottom: none;
+}
+
+/* Attendance Styles */
 .student-item.present {
     background-color: #f1f8e9;
 }
@@ -146,11 +115,63 @@
     color: #f44336;
 }
 
-/* Accordion Footer */
+/* Attendance Summary */
+.attendance-summary {
+    display: flex;
+    gap: 10px;
+    font-size: 0.9em;
+    padding: 4px 8px;
+}
+
+.attendance-summary span {
+    font-weight: 500;
+}
+
+.attendance-summary .present {
+    color: #4CAF50;
+}
+
+.attendance-summary .absent {
+    color: #f44336;
+}
+
+.attendance-summary .total {
+    color: #2196F3;
+}
+
+/* Footer */
 .accordion-footer {
     padding: 15px;
-    border-top: 1px solid #eee;
     background: #f8f9fa;
+    border-top: 1px solid #eee;
+}
+
+.download-btn {
+    width: 100%;
+    padding: 8px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.download-btn:hover {
+    background-color: #45a049;
+}
+
+/* Status Messages */
+.loading {
+    text-align: center;
+    color: #666;
+    padding: 15px;
+}
+
+.error {
+    color: #dc3545;
+    text-align: center;
+    padding: 15px;
 }
 
 /* Student Controls */
@@ -161,6 +182,7 @@
     flex-wrap: wrap;
 }
 
+/* Responsive Design */
 @media (max-width: 768px) {
     .student-controls {
         flex-direction: column;
@@ -173,5 +195,13 @@
     .attendance-summary {
         flex-direction: column;
         align-items: flex-start;
+    }
+    
+    .accordion-header {
+        padding: 12px 15px;
+    }
+    
+    .student-item {
+        padding: 8px 12px;
     }
 }

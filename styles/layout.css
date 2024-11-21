@@ -1,8 +1,70 @@
-/* Main Layout */
-.container {
-    padding: 20px;
+/* layout.css */
+
+/* Base Layout */
+.page-container {
+    display: flex;
     min-height: 100vh;
-    background-color: #f5f6fa;
+}
+
+/* Sidebar */
+.sidebar {
+    width: var(--sidebar-width);
+    background-color: var(--sidebar-bg);
+    color: var(--sidebar-text);
+    padding: var(--spacing-md);
+    flex-shrink: 0;
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 1000;
+}
+
+.sidebar-header {
+    padding-bottom: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    border-bottom: 1px solid var(--sidebar-border);
+}
+
+.sidebar-header h2 {
+    color: var(--sidebar-header);
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.sidebar-links {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-sm) var(--spacing-md);
+    color: var(--sidebar-link);
+    text-decoration: none;
+    border-radius: var(--border-radius-md);
+    transition: background-color var(--transition-speed);
+    background-color: var(--sidebar-link-bg);
+}
+
+.sidebar-link:hover {
+    background-color: var(--sidebar-link-hover);
+}
+
+.sidebar-link i {
+    margin-right: var(--spacing-sm);
+    font-size: 1.1em;
+}
+
+/* Main Content Area */
+.main-content {
+    flex-grow: 1;
+    margin-left: var(--sidebar-width);
+    padding: var(--spacing-md) var(--spacing-md) var(--spacing-md) var(--spacing-xl);
+    background-color: var(--main-bg);
+    width: calc(100% - var(--sidebar-width));
 }
 
 /* Header */
@@ -10,72 +72,108 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
+    padding: var(--spacing-md);
+    background-color: var(--white);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: var(--spacing-md);
 }
+
 .nav-buttons {
     display: flex;
-    gap: 10px;
+    gap: var(--spacing-sm);
+}
+
+/* Content Layout */
+.overview-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-md);
+    margin: var(--spacing-md) 0;
+}
+
+/* Sections */
+.section {
+    background: var(--white);
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.calendar-section,
+.student-section {
+    @extend .section;
+}
+
+/* Lists and Containers */
+.student-list-container {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.class-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+}
+
+.button-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-md);
 }
 
 /* Management Grid */
 .management-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 20px;
-    padding: 20px;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
 }
 
-/* Button Container */
-.button-container {
-    display: flex;
-    gap: 20px;
-    margin: 10px 0;
+/* Responsive Design */
+@media (max-width: 768px) {
+    .sidebar {
+        width: var(--sidebar-width-tablet);
+    }
+    
+    .main-content {
+        margin-left: var(--sidebar-width-tablet);
+        width: calc(100% - var(--sidebar-width-tablet));
+        padding: var(--spacing-md);
+    }
+
+    .overview-content {
+        grid-template-columns: 1fr;
+    }
 }
 
-/* Student List Layout */
-.student-list-container {
-    max-height: 300px;
-    overflow-y: auto;
-}
+@media (max-width: 576px) {
+    .sidebar {
+        width: var(--sidebar-width-mobile);
+        padding: var(--spacing-sm);
+    }
+    
+    .main-content {
+        margin-left: var(--sidebar-width-mobile);
+        width: calc(100% - var(--sidebar-width-mobile));
+        padding: var(--spacing-sm);
+    }
 
-/* Overview Content Layout */
-.overview-content {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    margin: 20px 0;
-}
+    .sidebar-header h2,
+    .sidebar-link span {
+        display: none;
+    }
 
-.calendar-section {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
+    .sidebar-link {
+        padding: var(--spacing-md);
+        justify-content: center;
+    }
 
-.student-section {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-/* Class Buttons */
-.class-buttons {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 20px;
-}
-
-/* Book Links Container */
-.button-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-    margin-top: 20px;
+    .sidebar-link i {
+        margin-right: 0;
+        font-size: 1.2rem;
+    }
 }

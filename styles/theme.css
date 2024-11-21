@@ -1,0 +1,38 @@
+:root {
+    /* Color Variables */
+    --sidebar-bg: #2c3e50;
+    --sidebar-text: #ffffff;
+    --sidebar-border: #34495e;
+    --sidebar-header: #ffffff;
+    --sidebar-link: #ffffff;
+    --sidebar-link-bg: #34495e;
+    --sidebar-link-hover: #3498db;
+    --main-bg: #f5f6fa;
+    
+    /* Spacing Variables */
+    --spacing-xs: 10px;
+    --spacing-sm: 15px;
+    --spacing-md: 20px;
+    --spacing-lg: 30px;
+    --spacing-xl: 60px;
+    
+    /* Layout Variables */
+    --sidebar-width: 250px;
+    --sidebar-width-tablet: 200px;
+    --sidebar-width-mobile: 60px;
+    
+    /* Border Radius */
+    --border-radius-sm: 4px;
+    --border-radius-md: 6px;
+    --border-radius-lg: 8px;
+    
+    /* Transitions */
+    --transition-speed: 0.3s;
+    
+    /* Shadows */
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    
+    /* Colors */
+    --white: #ffffff;
+}

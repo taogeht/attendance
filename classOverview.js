@@ -2,7 +2,6 @@
 
 let currentClass = null;
 let selectedDate = new Date();
-//let currentWeekStart = getWeekStart(new Date());
 let onDateChange = null;
 
 // Add this to the top of each page's JavaScript files
@@ -37,112 +36,66 @@ async function checkAuth() {
 // Initialize the app when the DOM is loaded
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', async () => {
-        await checkAuth();  // Check auth first
-        await initializeApp();  // Then initialize app
-        initializeSidebarLinks();  // Finally set up sidebar
+        await initializeApp();
+        initializeSidebarLinks();
     });
 } else {
-    // If DOM is already loaded, execute immediately but still maintain order
     (async () => {
-        await checkAuth();
         await initializeApp();
         initializeSidebarLinks();
     })();
 }
 
 async function initializeApp() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const teacherId = urlParams.get('teacher');
+    try {
+        // Get the teacher ID from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const teacherId = urlParams.get('teacher');
 
-    if (!teacherId) {
-        console.error('No teacher ID provided');
-        document.body.innerHTML = '<p>Error: No teacher selected. Please go back and select a teacher.</p>';
-        return;
-    }
-
-    // Show/hide admin panel button based on admin status
-    const isAdmin = localStorage.getItem('isAdmin') === 'true';
-    const adminPanelButton = document.getElementById('adminPanelButton');
-    if (adminPanelButton) {
-        adminPanelButton.style.display = isAdmin ? 'inline-block' : 'none';
-    }
-
-    // Safely add event listeners only if elements exist
-    const selectAllBtn = document.getElementById('selectAll');
-    const saveAttendanceBtn = document.getElementById('saveAttendance');
-    const downloadMonthlyBtn = document.getElementById('downloadMonthlyAttendance');
-
-    // Add logout button initialization
-    const logoutBtn = document.getElementById('logoutBtn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', async () => {
-            const sessionToken = localStorage.getItem('sessionToken');
-            if (sessionToken) {
-                try {
-                    // Remove session from database
-                    await window.supabase
-                        .from('active_sessions')
-                        .delete()
-                        .eq('session_token', sessionToken);
-                } catch (error) {
-                    console.error('Logout error:', error);
-                }
-            }
-            
-            // Clear all local storage
-            localStorage.clear();
-            
-            // Redirect to login page
-            window.location.href = 'login.html';
-        });
-    }
-
-    if (!teacherId) {
-        console.error('No teacher ID provided');
-        document.body.innerHTML = '<p>Error: No teacher selected. Please go back and select a teacher.</p>';
-        return;
-    }
-
-    // Safely add event listeners only if elements exist
-    const phonicsButton = document.getElementById('phonicsButton');
-    const readerButton = document.getElementById('readerButton');
-    const homeworkButton = document.getElementById('homeworkButton');
-
-    if (selectAllBtn) {
-        selectAllBtn.addEventListener('click', toggleSelectAll);
-    }
-    
-    if (saveAttendanceBtn) {
-        saveAttendanceBtn.addEventListener('click', saveAttendance);
-    }
-    
-    if (downloadMonthlyBtn) {
-        downloadMonthlyBtn.addEventListener('click', downloadMonthlyAttendance);
-    }
-    
-    if (readerButton) {
-        readerButton.addEventListener('click', () => {
-            window.open("http://getepic.com/", "_blank");
-        });
-    }
-    
-    await loadTeacherInfo(teacherId);
-    
-    // Only initialize calendar if weekCalendar element exists
-    if (document.getElementById('weekCalendar')) {
-        initializeCalendar();
-        updateSelectedDateDisplay();
-    }
-
-    // Set up date change handler
-    onDateChange = async (date) => {
-        selectedDate = new Date(date);  // Create a new Date object to avoid reference issues
-        updateSelectedDateDisplay();
-        if (currentClass) {
-            await loadAttendance(currentClass.id, selectedDate);  // Update attendance for the new date
+        if (!teacherId) {
+            console.error('No teacher ID provided');
+            document.body.innerHTML = '<p>Error: No teacher selected. Please go back and select a teacher.</p>';
+            return;
         }
-    };
-    
+
+        // Show/hide admin panel button based on admin status
+        const isAdmin = localStorage.getItem('isAdmin') === 'true';
+        const adminPanelButton = document.getElementById('adminPanelButton');
+        if (adminPanelButton) {
+            adminPanelButton.hidden = !isAdmin;
+        }
+
+        // Initialize components only if elements exist
+        const selectAllBtn = document.getElementById('selectAll');
+        const saveAttendanceBtn = document.getElementById('saveAttendance');
+        const downloadMonthlyBtn = document.getElementById('downloadMonthlyAttendance');
+
+        // Add logout button initialization
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', handleLogout);
+        }
+
+        // Initialize calendar if the element exists
+        if (document.getElementById('weekCalendar')) {
+            initializeCalendar();
+            updateSelectedDateDisplay();
+        }
+
+        // Load teacher information
+        await loadTeacherInfo(teacherId);
+
+        // Set up date change handler
+        onDateChange = async (date) => {
+            selectedDate = new Date(date);
+            updateSelectedDateDisplay();
+            if (currentClass) {
+                await loadAttendance(currentClass.id, selectedDate);
+            }
+        };
+    } catch (error) {
+        console.error('Error initializing app:', error);
+    }
 }
 
 function initializeSidebarLinks() {
@@ -1020,6 +973,21 @@ async function downloadMonthlyAttendance() {
     }
 }
 
-
+async function handleLogout() {
+    try {
+        const sessionToken = localStorage.getItem('sessionToken');
+        if (sessionToken) {
+            await window.supabase
+                .from('active_sessions')
+                .delete()
+                .eq('session_token', sessionToken);
+        }
+        clearSession();
+        window.location.href = 'login.html';
+    } catch (error) {
+        console.error('Logout error:', error);
+        window.location.href = 'login.html';
+    }
+}
 
 

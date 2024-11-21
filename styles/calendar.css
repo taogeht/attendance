@@ -30,6 +30,12 @@
     background-color: #2980b9;
 }
 
+.calendar-navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-md);
+}
+
 /* Month/Year Display */
 .month-year-display {
     text-align: center;
@@ -59,6 +65,25 @@
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     gap: 5px;
+}
+
+.classes-grid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+}
+
+.class-item {
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius-md);
+    background: var(--white);
+    box-shadow: var(--shadow-sm);
+}
+
+.class-header {
+    margin-bottom: var(--spacing-md);
 }
 
 /* Calendar Days */

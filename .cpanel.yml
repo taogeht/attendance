@@ -1,0 +1,7 @@
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/bryce603/brycecodes.com/attendance-1/
+    - /bin/cp -R * $DEPLOYPATH
+  branch: master # or 'main' depending on your default branch name
+  remote_host: github.com
+  protocol: https

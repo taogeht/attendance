@@ -4,70 +4,85 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Attendance Overview</title>
-    <link rel="stylesheet" href="admin-layout.css">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles/theme.css">
+    <link rel="stylesheet" href="styles/index.css">
 </head>
 <body>
-    <div class="sidebar">
-        <div class="sidebar-header">
-            <h2>Admin Panel</h2>
-        </div>
-        <a href="index.html" class="nav-item">
-            <span class="nav-text">Teacher Selection</span>
-        </a>
-        <a href="adminAttendance.html" class="nav-item active">
-            <span class="nav-text">Attendance Overview</span>
-        </a>
-        <a href="studentAssignment.html" class="nav-item">
-            <span class="nav-text">Student Assignment</span>
-        </a>
-        <a href="manageTeachers.html" class="nav-item">
-            <span class="nav-text">Manage Teachers</span>
-        </a>
-        <a href="schedule.html" class="nav-item">
-            <span class="nav-text">Class Schedule</span>
-        </a>
-        <a href="scheduleTeachers.html" class="nav-item">
-            <span class="nav-text">Schedule Teachers</span>
-        </a>
-        <div class="sidebar-footer">
-            <a href="#" class="nav-item logout-btn" id="logoutBtn">
-                <i class="fas fa-sign-out-alt"></i>
-                <span class="nav-text">Logout</span>
-            </a>
-        </div>
-    </div>
-
-    <div class="container">
-        <h1>Attendance Overview</h1>
-        
-        <!-- Calendar Navigation -->
-        <div class="calendar-section section">
-            <div class="month-year-display" id="monthYearDisplay"></div>
-            <div id="calendarNavigation" class="calendar-navigation">
-                <button id="prevMonth" class="calendar-nav-btn">&lt;&lt; Prev Month</button>
-                <button id="prevWeek" class="calendar-nav-btn">&lt; Prev Week</button>
-                <button id="todayBtn" class="calendar-nav-btn today-btn">Today</button>
-                <button id="nextWeek" class="calendar-nav-btn">Next Week &gt;</button>
-                <button id="nextMonth" class="calendar-nav-btn">Next Month &gt;&gt;</button>
+    <div class="page-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Admin Panel</h2>
             </div>
-            <div id="weekCalendar" class="calendar-container"></div>
-        </div>
-        <button id="downloadAllAttendance" class="download-btn">Download All Class Attendance</button>
+            
+            <nav class="sidebar-links">
+                <a href="index.html" class="sidebar-link">
+                    <i aria-hidden="true">👥</i>
+                    <span>Teacher Selection</span>
+                </a>
+                <a href="adminAttendance.html" class="sidebar-link active">
+                    <i aria-hidden="true">📊</i>
+                    <span>Attendance Overview</span>
+                </a>
+                <a href="studentAssignment.html" class="sidebar-link">
+                    <i aria-hidden="true">📝</i>
+                    <span>Student Assignment</span>
+                </a>
+                <a href="manageTeachers.html" class="sidebar-link">
+                    <i aria-hidden="true">⚙️</i>
+                    <span>Manage Teachers</span>
+                </a>
+            </nav>
 
+            <div class="sidebar-footer">
+                <button id="logoutBtn" class="sidebar-link logout-btn">
+                    <i aria-hidden="true">🚪</i>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </aside>
 
-        <!-- Classes Grid -->
-        <div id="classesGrid" class="classes-grid">
-            <!-- Classes will be populated here -->
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="header">
+                <h1>Attendance Overview</h1>
+            </header>
+
+            <div class="overview-content">
+                   <!-- Classes Section -->
+    <section class="section classes-section">
+        <header class="section-header">
+            <h2>Classes</h2>
+            <div class="class-selector">
+                <select id="classSelect" class="class-dropdown">
+                    <option value="">Select a class...</option>
+                </select>
+            </div>
+        </header>
+        <div id="selectedClassDetails" class="class-details">
+            <!-- Selected class details will be shown here -->
         </div>
+    </section>
+                <!-- Calendar Section -->
+                <section class="section calendar-section">
+                    <header class="section-header">
+                        <div id="monthYearDisplay" class="month-year-display"></div>
+                        <div id="calendarNavigation" class="calendar-navigation"></div>
+                    </header>
+                    <div class="calendar">
+                        <div id="weekCalendar"></div>
+                    </div>
+                </section>
+            </div>
+        </main>
     </div>
 
     <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="supabase-init.js"></script>
-    <script src="admin-layout.js"></script>
     <script src="auth.js"></script>
+    <script src="admin-layout.js"></script>
     <script src="adminAttendance.js"></script>
 </body>
 </html>
